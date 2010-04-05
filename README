@@ -5,15 +5,15 @@
 >>> Polski:
 
 ==============================
-Nie edytuj ¿adnych plików .rb Notatnikiem - na pocz¹tku plików zapisanych w Unikodzie dodaje on tzw. BOM, który powoduje wywalanie siê Rubiego. Edytuj jest WordPadem lub, najlepiej, jakimœ edytorem z kolorowaniem sk³adni (np. Notepad++).
+Nie edytuj Å¼adnych plikÃ³w .rb Notatnikiem - na poczÄ…tku plikÃ³w zapisanych w Unikodzie dodaje on tzw. BOM, ktÃ³ry powoduje wywalanie siÄ™ Rubiego. Edytuj jest WordPadem lub, najlepiej, jakimÅ› edytorem z kolorowaniem skÅ‚adni (np. Notepad++).
 ==============================
-Aby bot zawsze automatycznie siê logowa³ bez koniecznoœci podawania has³a w pliku .rb, utwórz plik o nazwie "userdata" (bez rozszerzenia) i w treœci wpisz (oddzielaj¹c enterem) kolejno URL do wiki, login i has³o. Wtedy Sunflower.new() i s.login() mo¿na wywo³ywaæ bez parametrów - z pustymi nawiasami.
+Aby bot zawsze automatycznie siÄ™ logowaÅ‚ bez koniecznoÅ›ci podawania hasÅ‚a w pliku .rb, utwÃ³rz plik o nazwie "userdata" (bez rozszerzenia) i w treÅ›ci wpisz (oddzielajÄ…c enterem) kolejno URL do wiki, login i hasÅ‚o. Wtedy Sunflower.new() i s.login() moÅ¼na wywoÅ‚ywaÄ‡ bez parametrÃ³w - z pustymi nawiasami.
 ==============================
 
-sunflower-core.rb to podstawowy plik z ram¹ bota. sunflower-commontasks.rb zawiera parê funkcji, które u³atwiaj¹cy wykonywanie ró¿nych zadañ.
+sunflower-core.rb to podstawowy plik z ramÄ… bota. sunflower-commontasks.rb zawiera parÄ™ funkcji, ktÃ³re uÅ‚atwiajÄ…cy wykonywanie rÃ³Å¼nych zadaÅ„.
 
-example-bot.rb to przyk³ad bota; jest to niemal najkrótszy kod, który cokolwiek mo¿e zrobiæ, ten pobiera stronê, dodaje do niej "test" i zapisuje j¹.
+example-bot.rb to przykÅ‚ad bota; jest to niemal najkrÃ³tszy kod, ktÃ³ry cokolwiek moÅ¼e zrobiÄ‡, ten pobiera stronÄ™, dodaje do niej "test" i zapisuje jÄ….
 
-use-easy-bot.rb to skrypt pozwalaj¹cy w zamierzeniu na uzycie bota laikom. Pobiera listê stron z pliku (nale¿y j¹ stworzyæ np. AWB i zapisaæ jako "Plaintext list" - tytu³y stron oddzielone enterami), po czym w ka¿dej wykonuje okreœlone zmiany i zapisuje. Dok³adniejszy opis jest w samym pliku, pamiêtaj te¿, ¿eby zmieniæ oznaczone fragmenty. Komentarze zaczynaj¹ siê od znaku "#".
+use-easy-bot.rb to skrypt pozwalajÄ…cy w zamierzeniu na uzycie bota laikom. Pobiera listÄ™ stron z pliku (naleÅ¼y jÄ… stworzyÄ‡ np. AWB i zapisaÄ‡ jako "Plaintext list" - tytuÅ‚y stron oddzielone enterami), po czym w kaÅ¼dej wykonuje okreÅ›lone zmiany i zapisuje. DokÅ‚adniejszy opis jest w samym pliku, pamiÄ™taj teÅ¼, Å¼eby zmieniÄ‡ oznaczone fragmenty. Komentarze zaczynajÄ… siÄ™ od znaku "#".
 
-W /scripts jest parê moich skryptów, niektóre moga siê przydaæ, niektóre nie albo w ogóle nie dzia³aj¹.
+W /scripts jest parÄ™ moich skryptÃ³w, niektÃ³re moga siÄ™ przydaÄ‡, niektÃ³re nie albo w ogÃ³le nie dziaÅ‚ajÄ….
