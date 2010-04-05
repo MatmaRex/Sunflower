@@ -1,4 +1,3 @@
-require 'rubygems' rescue nil
 require 'net/http'
 require 'net/https'
 require 'json'

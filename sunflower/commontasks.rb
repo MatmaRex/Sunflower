@@ -1,5 +1,3 @@
-require 'sunflower-core.rb'
-
 # extends Page with some methods letting easily perform common tasks
 
 class Page

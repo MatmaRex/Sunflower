@@ -1,5 +1,3 @@
-require 'sunflower-core.rb'
-
 class Sunflower
 	def make_list(type,*parameters)
 	# makes list of articles
