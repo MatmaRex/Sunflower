@@ -1,3 +1,4 @@
+# coding: utf-8
 # extends Page with some methods letting easily perform common tasks
 
 class Page

@@ -1,3 +1,4 @@
+# coding: utf-8
 class Sunflower
 	def make_list(type,*parameters)
 	# makes list of articles

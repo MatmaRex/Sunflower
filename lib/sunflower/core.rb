@@ -1,11 +1,9 @@
-require 'rubygems' rescue nil
+# coding: utf-8
 require 'net/http'
 require 'net/https'
 require 'json'
 require 'cgi'
 include Net
-
-require 'pp'
 
 class Sunflower
 =begin
@@ -19,14 +17,17 @@ Then you can request data from API using #API method.
 To log data to file, use #log method (works like puts, append new line if needed) of #log2 (like print).
 You can use multiple Sunflowers at once, to work on multiple wikis.
 =end
+	
+	# Path to user data file.
+	def self.path
+		File.join(ENV['HOME'], 'sunflower-userdata')
+	end
 
 	attr_accessor :cookie, :headers, :wikiURL, :warnings, :log
 	
 	def initialize(url='') #pl.wikipedia.org
 		begin
-			f=File.open('userdata')
-			r=f.read
-			f.close
+			r=File.read(Sunflower.path)
 			@userdata=r.split(/\r?\n/).map{|i| i.strip}
 		rescue
 			@userdata=[]
@@ -55,14 +56,14 @@ You can use multiple Sunflowers at once, to work on multiple wikis.
 	end
 	
 	def API(request)
-		$stderr.puts 'Warning: Sunflower: API request before logging in! ('+request+')' unless @loggedin || !@warnings
+		#$stderr.puts 'Warning: Sunflower: API request before logging in! ('+request+')' unless @loggedin || !@warnings
 		self.log 'http://'+@wikiURL+'/w/api.php?'+request+'&format=jsonfm'
 		http=HTTP.start(@wikiURL)
 		resp=http.request(HTTP::Post.new('/w/api.php', @headers), request+'&format=json')
 		JSON.parse(resp.body.to_s)
 	end
 	
-	def login(user='', password='', donotsave=false)
+	def login(user='', password='')
 		if user=='' || password==''
 			if !@userdata.empty?
 				user=@userdata[1] if user==''
@@ -80,6 +81,8 @@ You can use multiple Sunflowers at once, to work on multiple wikis.
 		
 		resp=http.request(HTTP::Post.new('/w/api.php', @headers), "action=login&lgname=#{user}&lgpassword=#{password}")
 		@headers['Cookie'] = @cookie = resp.response['set-cookie']
+    
+    PP.pp @headers['Cookie']
 		
 		raise RuntimeError, 'Sunflower - unable to log in (no cookies received)!' if !@cookie
 		
@@ -88,6 +91,7 @@ You can use multiple Sunflowers at once, to work on multiple wikis.
 		r=self.API('action=query&list=watchlistraw')
 		if r['error'] && r['error']['code']=='wrnotloggedin'
 			@loggedin=false
+      PP.pp r
 			raise RuntimeError, 'Sunflower - unable to log in!'
 		end
 		
@@ -216,7 +220,7 @@ To get Sunflower instance which this page belongs to, use #sunflower of #belongs
 		
 		self.code_cleanup if $alwaysDoCodeCleanup && self.respond_to?('code_cleanup')
 		
-		r=@sunflower.API("action=edit&bot=1&title=#{CGI.escape(title)}&text=#{CGI.escape(@text)}&summary=#{CGI.escape(summary)}&token=#{CGI.escape(@edittoken)}") if @sunflower.isBot?
+		r=@sunflower.API("action=edit&bot=1&title=#{CGI.escape(title)}&text=#{CGI.escape(@text)}&summary=#{CGI.escape(summary)}&token=#{CGI.escape(@edittoken)}")# if @sunflower.isBot?
 	end
 	alias :put :save
 	
