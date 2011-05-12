@@ -1,22 +1,21 @@
 # coding: utf-8
 class Sunflower
-	def make_list(type,*parameters)
-	# makes list of articles
-	# saves it to currentlist.txt
-	# returns array of titles
-		type=type.downcase.gsub(/[^a-z]/,'')
+	# Makes a list of articles. Returns array of titles.
+	def make_list type, *parameters
+		type=type.downcase.gsub(/[^a-z]/, '')
 		first=parameters[0]
-		firstE=CGI.escape(first)
+		firstE=CGI.escape first
 		
-		if type=='file'
-			f=File.open(first)
+		case type
+		when 'file'
+			f=File.open first
 			list=f.read.sub(/\357\273\277/,'').strip.split(/\r?\n/)
 			f.close
 			
-		elsif type=='page' || type=='pages'
+		when 'page', 'pages'
 			list=parameters
 			
-		elsif type=='input'
+		when 'input'
 			puts 'Insert titles of articles to edit:'
 			puts 'Press [Enter] without inputting any text to finish.'
 			puts 'Press [Ctrl]+[C] to kill bot.'
@@ -28,15 +27,15 @@ class Sunflower
 				list<<input
 			end
 			
-		elsif type=='categorieson'
+		when 'categorieson'
 			r=self.API('action=query&prop=categories&cllimit=500&titles='+firstE)
 			list=r['query']['pages'].first['categories'].map{|v| v['title']} #extract titles
 			
-		elsif type=='category'
+		when 'category'
 			r=self.API('action=query&list=categorymembers&cmprop=title&cmlimit=5000&cmtitle='+firstE)
 			list=r['query']['categorymembers'].map{|v| v['title']} #extract titles
 			
-		elsif type=='categoryr' || type=='categoryrecursive'
+		when 'categoryr', 'categoryrecursive'
 			list=[] #list of articles
 			catsToProcess=[first] #list of categories to be processes
 			while !catsToProcess.empty?
@@ -47,47 +46,47 @@ class Sunflower
 			end
 			list.uniq! #remove dupes
 			
-		elsif type=='linkson'
+		when 'linkson'
 			r=self.API('action=query&prop=links&pllimit=5000&titles='+firstE)
 			list=r['query']['pages'].first['links'].map{|v| v['title']} #extract titles
 			
-		elsif type=='transclusionson' || type=='templateson'
+		when 'transclusionson', 'templateson'
 			r=self.API('action=query&prop=templates&tllimit=5000&titles='+firstE)
 			list=r['query']['pages'].first['templates'].map{|v| v['title']} #extract titles
 			
-		elsif type=='usercontribs' || type=='contribs'
+		when 'usercontribs', 'contribs'
 			r=self.API('action=query&list=usercontribs&uclimit=5000&ucprop=title&ucuser='+firstE)
 			list=r['query']['usercontribs'].map{|v| v['title']} #extract titles
 			
-		elsif type=='whatlinksto' || type=='whatlinkshere'
+		when 'whatlinksto', 'whatlinkshere'
 			r=self.API('action=query&list=backlinks&bllimit=5000&bltitle='+firstE)
 			list=r['query']['backlinks'].map{|v| v['title']} #extract titles
 			
-		elsif type=='whattranscludes' || type=='whatembeds'
+		when 'whattranscludes', 'whatembeds'
 			r=self.API('action=query&list=embeddedin&eilimit=5000&eititle='+firstE)
 			list=r['query']['embeddedin'].map{|v| v['title']} #extract titles
 			
-		elsif type=='image' || type=='imageusage'
+		when 'image', 'imageusage'
 			r=self.API('action=query&list=imageusage&iulimit=5000&iutitle='+firstE)
 			list=r['query']['imageusage'].map{|v| v['title']} #extract titles
 			
-		elsif type=='search'
+		when 'search'
 			r=self.API('action=query&list=search&srwhat=text&srlimit=5000&srnamespace='+(parameters[1]=='allns' ? CGI.escape('0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|100|101|102|103') : '0')+'&srsearch='+firstE)
 			list=r['query']['search'].map{|v| v['title']} #extract titles
 			
-		elsif type=='searchtitles'
+		when 'searchtitles'
 			r=self.API('action=query&list=search&srwhat=title&srlimit=5000&srnamespace='+(parameters[1]=='allns' ? CGI.escape('0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|100|101|102|103') : '0')+'&srsearch='+firstE)
 			list=r['query']['search'].map{|v| v['title']} #extract titles
 		
-		elsif type=='random'
+		when 'random'
 			r=self.API('action=query&list=random&rnnamespace=0&rnlimit='+first.gsub(/\D/))
 			list=r['query']['random'].map{|v| v['title']} #extract titles
 			
-		elsif type=='external' || type=='linksearch'
+		when 'external', 'linksearch'
 			r=self.API('action=query&euprop=title&list=exturlusage&eulimit=5000&euquery='+firstE)
 			list=r['query']['exturlusage'].map{|v| v['title']} #extract titles
 			
-		elsif type=='google'
+		when 'google'
 			limit=[parameters[1].to_i,999].min
 			from=0
 			list=[]
@@ -101,7 +100,7 @@ class Sunflower
 				from+=10
 			end
 		
-		elsif type=='grep' || type=='regex' || type=='regexp'
+		when 'grep', 'regex', 'regexp'
 			split=@wikiURL.split('.')
 			ns=(parameters[1] ? parameters[1].to_s.gsub(/\D/,'') : '0')
 			redirs=(parameters[2] ? '&redirects=on' : '')
@@ -115,7 +114,6 @@ class Sunflower
 		
 		return list
 	end
-	alias :makeList :make_list
 end
 
 if $0==__FILE__

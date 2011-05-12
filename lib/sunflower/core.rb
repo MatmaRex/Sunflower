@@ -22,7 +22,7 @@ class Sunflower
 
 	attr_accessor :cookie, :headers, :wikiURL, :warnings, :log
 	
-	# Initialize a new Sunflwer working on a wiki with given URL, for ex. "pl.wikipedia.org".
+	# Initialize a new Sunflower working on a wiki with given URL, for ex. "pl.wikipedia.org".
 	def initialize url=''
 		begin
 			r=File.read(Sunflower.path)
@@ -146,26 +146,20 @@ end
 #
 # If you are using multiple Sunflowers, you have to specify which wiki this page belongs to using second argument of function; you can pass whole URL (same as when creating new Sunflower) or just language code.
 #
-# To read page text, use #text or #read method.
-# To change text of page, use #text= or #write method.
-#
 # To save page, use #save/#put method. Optional argument is new title page, if ommited, page is saved at old title. Summary can be passed as second parameter. If it's ommited, global variable $summary is used. If it's empty too, error is raised.
 #
 # To get Sunflower instance which this page belongs to, use #sunflower of #belongs_to.
 class Page
 	attr_accessor :text
-	alias :read :text
-	alias :write :text=
 	
 	attr_reader :orig_text
-	alias :origText :orig_text
 	
 	attr_reader :sunflower
 	alias :belongs_to :sunflower
 	
 	attr_reader :pageid, :ns, :title, :touched, :lastrevid, :counter, :length, :starttimestamp, :edittoken, :protection #prop=info
 	
-	def initialize(title='', wiki='')
+	def initialize title='', wiki=''
 		raise RuntimeError, 'Sunflower - title invalid: '+title if title.index(/[#<>\[\]\|\{\}]/)
 		
 		@modulesExecd=[] #used by sunflower-commontasks.rb
@@ -203,7 +197,7 @@ class Page
 		@orig_text=@text
 	end
 	
-	def dumpto(file)
+	def dumpto file
 		if file.respond_to? :write #probably file or IO
 			file.write @text
 		else #filename?
@@ -217,7 +211,7 @@ class Page
 		self.dumpto @title.gsub(/[^a-zA-Z0-9\-]/,'_')+'.txt'
 	end
 	
-	def save(title=@title, summary=$summary)
+	def save title=@title, summary=$summary
 		raise RuntimeError, 'Sunflower - title invalid: '+title if title.index(/[#<>\[\]\|\{\}]/)
 		raise RuntimeError, 'Sunflower - no summary!' if (summary==nil || summary=='') && @summaryAppend==[]
 		
@@ -241,11 +235,11 @@ class Page
 	end
 	alias :put :save
 	
-	def self.get(title, wiki='')
+	def self.get title, wiki=''
 		Page.new(title, wiki)
 	end
 	
-	def self.load(title, wiki='')
+	def self.load title, wiki=''
 		Page.new(title, wiki)
 	end
 end

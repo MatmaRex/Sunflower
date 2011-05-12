@@ -18,7 +18,7 @@ class Page
 	# oi:module, only-if:module
 	# !oi:module, only-if-not:module
 	# s:append to summary, summary:append to summary
-		originalText=self.read
+		originalText = self.text.dup
 	
 		commands.each do |cmd|
 			f=cmd.shift
@@ -56,9 +56,9 @@ class Page
 				end
 			end
 			
-			oldText=self.read
+			oldText=self.text
 			self.method(methodName).call(*cmd)
-			newText=self.read
+			newText=self.text
 			
 			@modulesExecd<<methodName if oldText!=newText
 			
@@ -67,7 +67,7 @@ class Page
 			end
 			
 			if modifiers['r'] && oldText==newText
-				self.write originalText
+				self.text = originalText
 				break #reset text and stop executing commands
 			end
 		end
@@ -78,7 +78,7 @@ class Page
 	def replace from, to, once=false
 	# replaces "from" with "to" in page text
 	# "from" may be regex
-		self.write( self.read.send( (once ? 'sub' : 'gsub'), from, to ) )
+		self.text = self.text.send( (once ? 'sub' : 'gsub'), from, to )
 	end
 	def gsub from, to
 		self.replace from, to
@@ -87,23 +87,23 @@ class Page
 		self.replace from, to, true
 	end
 	
-	def append text, newlines=2
+	def append txt, newlines=2
 	# appends newlines and text
 	# by default - 2 newlines
-		self.write(self.read.rstrip+("\n"*newlines)+text)
+		self.text = self.text.rstrip + ("\n"*newlines) + txt
 	end
 	
-	def prepend text, newlines=2
+	def prepend txt, newlines=2
 	# prepends text and newlines
 	# by default - 2 newlines
-		self.write(text+("\n"*newlines)+self.read.lstrip)
+		self.text = txt + ("\n"*newlines) + self.text.lstrip
 	end
 	
 	def code_cleanup
 	# simple, safe code cleanup
 	# use $alwaysDoCodeCleanup=true to do it automatically just before saving page
 	# based on Nux's cleaner: http://pl.wikipedia.org/wiki/Wikipedysta:Nux/wp_sk.js
-		str=self.read.gsub(/\r\n/,"\n")
+		str=self.text.gsub(/\r\n/,"\n")
 		
 		str.gsub!(/\{\{\s*([^|{}]+ |uni|)stub2?(\|[^{}]+)?\}\}/i){
 			if $1=='sekcja '
@@ -165,9 +165,8 @@ class Page
 		
 		3.times { str.gsub!('{{stub}}{{stub}}', '{{stub}}') }
 		
-		self.write str
+		self.text = str
 	end
-	alias :codeCleanup :code_cleanup
 	
 	def friendly_infobox
 	# cleans up infoboxes
@@ -241,14 +240,12 @@ class Page
 			str=str.sub(before+match,'')
 		end
 	
-		self.write nstr
+		self.text = nstr
 	end
-	alias :friendlyInfobox :friendly_infobox
 	
 	def change_category from, to
 		from=from.sub(/\A\s*([cC]ategory|[kK]ategoria):/, '').strip
 		to=to.sub(/\A\s*([cC]ategory|[kK]ategoria):/, '').strip
-		self.text=self.text.gsub!(/\[\[ *(?:[cC]ategory|[kK]ategoria) *: *#{Regexp.escape from} *(\|[^\]]+ *|)\]\]/){'[[Kategoria:'+to+$1.rstrip+']]'}
+		self.text = self.text.gsub!(/\[\[ *(?:[cC]ategory|[kK]ategoria) *: *#{Regexp.escape from} *(\|[^\]]+ *|)\]\]/){'[[Kategoria:'+to+$1.rstrip+']]'}
 	end
-	alias :changeCategory :change_category
 end
