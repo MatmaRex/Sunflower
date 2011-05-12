@@ -1,23 +1,20 @@
 # coding: utf-8
-require 'net/http'
-require 'net/https'
+require 'rest-client'
 require 'json'
 require 'cgi'
-include Net
 
+# Main class. To start working, you have to create new Sunflower:
+#   s = Sunflower.new('en.wikipedia.org')
+# And then log in:
+#   s.login('Username','password')
+#
+# If you have ran setup, you can just use
+#   s = Sunflower.new.login
+#
+# Then you can request data from API using #API method.
+# To log data to file, use #log method (works like puts, append new line if needed) of #log2 (like print).
+# You can use multiple Sunflowers at once, to work on multiple wikis.
 class Sunflower
-=begin
-
-Main class. To start working, you have to create new Sunflower:
-	s=Sunflower.new('en.wikipedia.org')
-And then log in:
-	s.login('Username','password')
-
-Then you can request data from API using #API method.
-To log data to file, use #log method (works like puts, append new line if needed) of #log2 (like print).
-You can use multiple Sunflowers at once, to work on multiple wikis.
-=end
-	
 	# Path to user data file.
 	def self.path
 		File.join(ENV['HOME'], 'sunflower-userdata')
@@ -25,7 +22,8 @@ You can use multiple Sunflowers at once, to work on multiple wikis.
 
 	attr_accessor :cookie, :headers, :wikiURL, :warnings, :log
 	
-	def initialize(url='') #pl.wikipedia.org
+	# Initialize a new Sunflwer working on a wiki with given URL, for ex. "pl.wikipedia.org".
+	def initialize url=''
 		begin
 			r=File.read(Sunflower.path)
 			@userdata=r.split(/\r?\n/).map{|i| i.strip}
@@ -48,22 +46,21 @@ You can use multiple Sunflowers at once, to work on multiple wikis.
 		@logData=''
 		
 		@loggedin=false
-		@cookie=''
-		@headers = {
-			'User-Agent' => 'Sunflower alpha',
-			'Cookie' => @cookie
-		}
 	end
 	
-	def API(request)
+	# Call the API. Returns a hash of JSON response.
+	def API request
 		#$stderr.puts 'Warning: Sunflower: API request before logging in! ('+request+')' unless @loggedin || !@warnings
 		self.log 'http://'+@wikiURL+'/w/api.php?'+request+'&format=jsonfm'
-		http=HTTP.start(@wikiURL)
-		resp=http.request(HTTP::Post.new('/w/api.php', @headers), request+'&format=json')
-		JSON.parse(resp.body.to_s)
+		resp = RestClient.get(
+			'http://'+@wikiURL+'/w/api.php?'+request+'&format=json',
+			{:user_agent => 'Sunflower alpha', :cookies => @cookies}
+		)
+		JSON.parse resp.to_str
 	end
 	
-	def login(user='', password='')
+	# Log in using given info.
+	def login user='', password=''
 		if user=='' || password==''
 			if !@userdata.empty?
 				user=@userdata[1] if user==''
@@ -77,21 +74,42 @@ You can use multiple Sunflowers at once, to work on multiple wikis.
 			raise RuntimeError, 'Sunflower - bad username!'
 		end
 		
-		http=HTTP.start(@wikiURL)
 		
-		resp=http.request(HTTP::Post.new('/w/api.php', @headers), "action=login&lgname=#{user}&lgpassword=#{password}")
-		@headers['Cookie'] = @cookie = resp.response['set-cookie']
-    
-    PP.pp @headers['Cookie']
+		# 1. get the login token
+		response = RestClient.post(
+			'http://'+@wikiURL+'/w/api.php?'+"action=login&lgname=#{user}&lgpassword=#{password}"+'&format=json', 
+			nil,
+			{:user_agent => 'Sunflower alpha'}
+		)
 		
-		raise RuntimeError, 'Sunflower - unable to log in (no cookies received)!' if !@cookie
+		@cookies = response.cookies
+		json = JSON.parse response.to_str
+		token, prefix = json['login']['token'], json['login']['cookieprefix']
+		
+		
+		# 2. actually log in
+		response = RestClient.post(
+			'http://'+@wikiURL+'/w/api.php?'+"action=login&lgname=#{user}&lgpassword=#{password}&lgtoken=#{token}"+'&format=json',
+			nil,
+			{:user_agent => 'Sunflower alpha', :cookies => @cookies}
+		)
+		
+		json = JSON.parse response.to_str
+		
+		@cookies = @cookies.merge(response.cookies).merge({
+			"#{prefix}UserName" => json['login']['lgusername'].to_s,
+			"#{prefix}UserID" => json['login']['lguserid'].to_s,
+			"#{prefix}Token" => json['login']['lgtoken'].to_s
+		})
+		
+		
+		raise RuntimeError, 'Sunflower - unable to log in (no cookies received)!' if !@cookies
 		
 		
 		@loggedin=true		
 		r=self.API('action=query&list=watchlistraw')
 		if r['error'] && r['error']['code']=='wrnotloggedin'
 			@loggedin=false
-      PP.pp r
 			raise RuntimeError, 'Sunflower - unable to log in!'
 		end
 		
@@ -102,6 +120,8 @@ You can use multiple Sunflowers at once, to work on multiple wikis.
 		else
 			@haveBotRights=true
 		end
+		
+		return self
 	end
 	
 	def log2(t)
@@ -122,20 +142,17 @@ You can use multiple Sunflowers at once, to work on multiple wikis.
 	end
 end
 
+# Class representng single Wiki page. To load specified page, use #new/#get/#load method.
+#
+# If you are using multiple Sunflowers, you have to specify which wiki this page belongs to using second argument of function; you can pass whole URL (same as when creating new Sunflower) or just language code.
+#
+# To read page text, use #text or #read method.
+# To change text of page, use #text= or #write method.
+#
+# To save page, use #save/#put method. Optional argument is new title page, if ommited, page is saved at old title. Summary can be passed as second parameter. If it's ommited, global variable $summary is used. If it's empty too, error is raised.
+#
+# To get Sunflower instance which this page belongs to, use #sunflower of #belongs_to.
 class Page
-=begin
-Class representng single Wiki page. To load specified page, use #new/#get/#load method.
-
-If you are using multiple Sunflowers, you have to specify which wiki this page belongs to using second argument of function; you can pass whole URL (same as when creating new Sunflower) or just language code.
-
-To read page text, use #text or #read method.
-To change text of page, use #text= or #write method.
-
-To save page, use #save/#put method. Optional argument is new title page, if ommited, page is saved at old title. Summary can be passed as second parameter. If it's ommited, global variable $summary is used. If it's empty too, error is raised.
-
-To get Sunflower instance which this page belongs to, use #sunflower of #belongs_to.
-=end
-
 	attr_accessor :text
 	alias :read :text
 	alias :write :text=
@@ -234,8 +251,9 @@ To get Sunflower instance which this page belongs to, use #sunflower of #belongs
 end
 
 class Hash
-# just a lil patch
+	# just a lil patch
 	def first
 		self.values[0]
 	end
 end
+

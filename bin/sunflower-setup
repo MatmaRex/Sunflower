@@ -3,6 +3,11 @@ require 'sunflower'
 
 path = Sunflower.path
 
+
+
+puts "Welcome to Sunflower's setup script."
+puts ""
+
 puts "If you set your home wiki and userdata, you will not have to enter it in every script."
 puts "Your userdata will be saved (IN PLAINTEXT!) in this file:"
 puts "  #{path}"
@@ -11,14 +16,13 @@ puts ""
 
 print "Enter your home wiki (for ex. en.wikipedia.org): "
 home=gets.strip
-puts ""
 
 print "Enter your bot's nick on the home wiki: "
 nick=gets.strip
-puts ""
 
 print "Enter your bot's password on home wiki (WILL BE SHOWN IN PLAINTEXT): "
 pass=gets.strip
+
 puts ""
 
 worked = true
@@ -28,6 +32,7 @@ begin
 	s.login nick, pass
 rescue
 	worked = false
+	error = $!.message
 end
 
 if worked
@@ -35,14 +40,14 @@ if worked
 	puts "WARNING! USER DOES NOT HAVE BOT RIGHTS!" if !s.isBot?
 else
 	puts "Whoops, it didn't work. The error message is:"
-	puts $!.message
+	puts error
 end
 
-save_them = worked
+save = worked
 
 if !worked
-	do
-		print "Do you want to save the data anyway? [yn]"
+	begin
+		print "Do you want to save the data anyway? [yn] "
 		ans = gets.strip
 	end until ans=~/[yn]/i
 	
@@ -51,7 +56,7 @@ end
 
 if save
 	f=File.open(path, "w")
-	f.write "#{home.strip}\n#{nick.strip}\n#{pass.strip}"
+	f.write [home, nick, pass].join "\n"
 	f.close
 	
 	puts "User data has been saved. Remember that your password is saved in plaintext!"

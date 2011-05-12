@@ -1,16 +1,25 @@
 Gem::Specification.new do |s|
-  s.name = "Sunflower"
+  s.name = "sunflower"
   s.version = "0.2"
   s.date = "2011-05-12"
   s.authors = ["Matma Rex"]
   s.email = "matma.rex@gmail.com"
+  s.homepage = "http://github.com/MatmaRex/Sunflower"
   s.summary = "Sunflower is a lightweight library to provide access to MediaWiki API from Ruby."
-  s.homepage = ""
   s.description = "Sunflower is a lightweight library to provide access to MediaWiki API from Ruby."
+	
+	
+	s.add_dependency 'json'
+	s.add_dependency 'rest-client'
+	
+	s.executables = ['sunflower-setup']
+	s.require_path = "lib"
+	s.bindir = "bin"
+	
   s.files = %w[
 		README
 		LICENSE
-		bin/sunflower-setup.rb
+		bin/sunflower-setup
 		example-bot.rb
 		use-easy-bot.rb
 		lib/sunflower.rb
