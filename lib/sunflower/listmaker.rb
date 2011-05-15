@@ -4,7 +4,7 @@ class Sunflower
 	def make_list type, *parameters
 		type=type.downcase.gsub(/[^a-z]/, '')
 		first=parameters[0]
-		firstE=CGI.escape first
+		firstE=CGI.escape first.to_s
 		
 		case type
 		when 'file'
@@ -79,7 +79,7 @@ class Sunflower
 			list=r['query']['search'].map{|v| v['title']} #extract titles
 		
 		when 'random'
-			r=self.API('action=query&list=random&rnnamespace=0&rnlimit='+first.gsub(/\D/))
+			r=self.API('action=query&list=random&rnnamespace=0&rnlimit='+firstE)
 			list=r['query']['random'].map{|v| v['title']} #extract titles
 			
 		when 'external', 'linksearch'
