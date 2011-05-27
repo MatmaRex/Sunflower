@@ -46,7 +46,7 @@ class Sunflower
 		end
 		
 		@warnings=true
-		@log=true
+		@log=false
 		
 		@wikiURL=url
 		
@@ -109,6 +109,7 @@ class Sunflower
 		raise SunflowerError, 'unable to log in (no cookies received)!' if !@cookies
 		
 		
+		# 3. confirm you did log in by checking the watchlist.
 		@loggedin=true
 		r=self.API('action=query&list=watchlistraw')
 		if r['error'] && r['error']['code']=='wrnotloggedin'
@@ -116,12 +117,13 @@ class Sunflower
 			raise SunflowerError, 'unable to log in!'
 		end
 		
+		# 4. check bot rights
 		r=self.API('action=query&list=allusers&aulimit=1&augroup=bot&aufrom='+user)
 		unless r['query']['allusers'][0]['name']==user
 			$stderr.puts 'Warning: Sunflower - this user does not have bot rights!' if @warnings
-			@haveBotRights=false
+			@is_bot=false
 		else
-			@haveBotRights=true
+			@is_bot=true
 		end
 		
 		return self
@@ -131,8 +133,8 @@ class Sunflower
 		File.open('log.txt','a'){|f| f.puts t}
 	end
 	
-	def isBot?
-		@haveBotRights
+	def is_bot?
+		@is_bot
 	end
 end
 
