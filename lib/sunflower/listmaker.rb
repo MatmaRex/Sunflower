@@ -29,11 +29,11 @@ class Sunflower
 			
 		when 'categorieson'
 			r=self.API('action=query&prop=categories&cllimit=500&titles='+firstE)
-			list=r['query']['pages'].first['categories'].map{|v| v['title']} #extract titles
+			list=r['query']['pages'].first['categories'].map{|v| v['title']}
 			
 		when 'category'
 			r=self.API('action=query&list=categorymembers&cmprop=title&cmlimit=5000&cmtitle='+firstE)
-			list=r['query']['categorymembers'].map{|v| v['title']} #extract titles
+			list=r['query']['categorymembers'].map{|v| v['title']}
 			
 		when 'categoryr', 'categoryrecursive'
 			list=[] #list of articles
@@ -48,43 +48,43 @@ class Sunflower
 			
 		when 'linkson'
 			r=self.API('action=query&prop=links&pllimit=5000&titles='+firstE)
-			list=r['query']['pages'].first['links'].map{|v| v['title']} #extract titles
+			list=r['query']['pages'].first['links'].map{|v| v['title']}
 			
 		when 'transclusionson', 'templateson'
 			r=self.API('action=query&prop=templates&tllimit=5000&titles='+firstE)
-			list=r['query']['pages'].first['templates'].map{|v| v['title']} #extract titles
+			list=r['query']['pages'].first['templates'].map{|v| v['title']}
 			
 		when 'usercontribs', 'contribs'
 			r=self.API('action=query&list=usercontribs&uclimit=5000&ucprop=title&ucuser='+firstE)
-			list=r['query']['usercontribs'].map{|v| v['title']} #extract titles
+			list=r['query']['usercontribs'].map{|v| v['title']}
 			
 		when 'whatlinksto', 'whatlinkshere'
 			r=self.API('action=query&list=backlinks&bllimit=5000&bltitle='+firstE)
-			list=r['query']['backlinks'].map{|v| v['title']} #extract titles
+			list=r['query']['backlinks'].map{|v| v['title']}
 			
 		when 'whattranscludes', 'whatembeds'
 			r=self.API('action=query&list=embeddedin&eilimit=5000&eititle='+firstE)
-			list=r['query']['embeddedin'].map{|v| v['title']} #extract titles
+			list=r['query']['embeddedin'].map{|v| v['title']}
 			
 		when 'image', 'imageusage'
 			r=self.API('action=query&list=imageusage&iulimit=5000&iutitle='+firstE)
-			list=r['query']['imageusage'].map{|v| v['title']} #extract titles
+			list=r['query']['imageusage'].map{|v| v['title']}
 			
 		when 'search'
 			r=self.API('action=query&list=search&srwhat=text&srlimit=5000&srnamespace='+(parameters[1]=='allns' ? CGI.escape('0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|100|101|102|103') : '0')+'&srsearch='+firstE)
-			list=r['query']['search'].map{|v| v['title']} #extract titles
+			list=r['query']['search'].map{|v| v['title']}
 			
 		when 'searchtitles'
 			r=self.API('action=query&list=search&srwhat=title&srlimit=5000&srnamespace='+(parameters[1]=='allns' ? CGI.escape('0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|100|101|102|103') : '0')+'&srsearch='+firstE)
-			list=r['query']['search'].map{|v| v['title']} #extract titles
+			list=r['query']['search'].map{|v| v['title']}
 		
 		when 'random'
 			r=self.API('action=query&list=random&rnnamespace=0&rnlimit='+firstE)
-			list=r['query']['random'].map{|v| v['title']} #extract titles
+			list=r['query']['random'].map{|v| v['title']}
 			
 		when 'external', 'linksearch'
 			r=self.API('action=query&euprop=title&list=exturlusage&eulimit=5000&euquery='+firstE)
-			list=r['query']['exturlusage'].map{|v| v['title']} #extract titles
+			list=r['query']['exturlusage'].map{|v| v['title']}
 			
 		when 'google'
 			limit=[parameters[1].to_i,999].min
