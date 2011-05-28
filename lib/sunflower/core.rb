@@ -26,6 +26,9 @@ class Sunflower
 		File.join(ENV['HOME'], 'sunflower-userdata')
 	end
 
+	# Options for this Sunflower.
+	attr_accessor :summary, :always_do_code_cleanup
+	
 	attr_accessor :cookie, :headers, :wikiURL, :warnings, :log
 	
 	# Initialize a new Sunflower working on a wiki with given URL, for ex. "pl.wikipedia.org".
@@ -120,7 +123,7 @@ class Sunflower
 		# 4. check bot rights
 		r=self.API('action=query&list=allusers&aulimit=1&augroup=bot&aufrom='+user)
 		unless r['query']['allusers'][0]['name']==user
-			$stderr.puts 'Warning: Sunflower - this user does not have bot rights!' if @warnings
+			warn 'Sunflower - this user does not have bot rights!' if @warnings
 			@is_bot=false
 		else
 			@is_bot=true
@@ -144,7 +147,7 @@ end
 #
 # If you are using multiple Sunflowers, you have to specify which wiki this page belongs to using second argument of function; you can pass whole URL (same as when creating new Sunflower) or just language code.
 #
-# To save page, use #save/#put method. Optional argument is new title page, if ommited, page is saved at old title. Summary can be passed as second parameter. If it's ommited, global variable $summary is used. If it's empty too, error is raised.
+# To save page, use #save/#put method. Optional argument is new title page, if ommited, page is saved at old title. Summary can be passed as second parameter. If it's ommited, s.summary is used. If it's empty too, error is raised.
 #
 # To get Sunflower instance which this page belongs to, use #sunflower of #belongs_to.
 class Page
@@ -228,18 +231,21 @@ class Page
 		self.dump_to @title.gsub(/[^a-zA-Z0-9\-]/,'_')+'.txt'
 	end
 	
-	def save title=@title, summary=$summary
+	def save title=@title, summary=nil
 		preload_attrs unless @preloaded_attrs
 		
+		summary = @sunflower.summary if !summary
+		
 		raise SunflowerError, 'title invalid: '+title if title =~ INVALID_CHARS_REGEX
-		raise SunflowerError, 'no summary!' if (summary==nil || summary=='') && @summaryAppend==[]
+		raise SunflowerError, 'no summary!' if (!summary or summary=='') && @summaryAppend.empty?
 		
-		summary='' if summary==nil
-		for i in @summaryAppend.uniq
-			summary+=', '+i
+		unless @summaryAppend.empty?
+			if !summary or summary==''
+				summary = @summaryAppend.uniq.join(', ')
+			else
+				summary =  summary.sub(/,\s*\Z/, '') + ', ' + @summaryAppend.uniq.join(', ')
+			end
 		end
-		summary.sub!(/^, /,'')
-		
 		
 		if @orig_text==@text && title==@title
 			@sunflower.log('Page '+title+' not saved - no changes.')
@@ -248,7 +254,7 @@ class Page
 		
 		
 		
-		self.code_cleanup if $alwaysDoCodeCleanup && self.respond_to?('code_cleanup')
+		self.code_cleanup if @sunflower.always_do_code_cleanup && self.respond_to?('code_cleanup')
 		
 		r=@sunflower.API("action=edit&bot=1&title=#{CGI.escape(title)}&text=#{CGI.escape(@text)}&summary=#{CGI.escape(summary)}&token=#{CGI.escape(@edittoken)}")# if @sunflower.isBot?
 	end

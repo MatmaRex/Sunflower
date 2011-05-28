@@ -101,7 +101,7 @@ class Page
 	
 	def code_cleanup
 	# simple, safe code cleanup
-	# use $alwaysDoCodeCleanup=true to do it automatically just before saving page
+	# use Sunflower.always_do_code_cleanup=true to do it automatically just before saving page
 	# based on Nux's cleaner: http://pl.wikipedia.org/wiki/Wikipedysta:Nux/wp_sk.js
 		str=self.text.gsub(/\r\n/,"\n")
 		
