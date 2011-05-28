@@ -12,7 +12,9 @@ require 'cgi'
 #   s = Sunflower.new.login
 #
 # Then you can request data from API using #API method.
-# To log data to file, use #log method (works like puts, append new line if needed) of #log2 (like print).
+#
+# To log data to file, use #log method (works like puts). Use RestClient.log=<io> to log all requests.
+#
 # You can use multiple Sunflowers at once, to work on multiple wikis.
 
 class SunflowerError < StandardError; end
@@ -56,12 +58,17 @@ class Sunflower
 		@loggedin=false
 	end
 	
-	# Call the API. Returns a hash of JSON response.
+	# Call the API. Returns a hash of JSON response. Request can be a HTTP request string or a hash.
 	def API request
-		self.log 'http://'+@wikiURL+'/w/api.php?'+request+'&format=jsonfm'
+		if request.is_a? String
+			request += '&format=json'
+		elsif request.is_a? Hash
+			request.merge!({format:'json'})
+		end
+		
 		resp = RestClient.post(
 			'http://'+@wikiURL+'/w/api.php',
-			request+'&format=json',
+			request,
 			{:user_agent => 'Sunflower alpha', :cookies => @cookies}
 		)
 		JSON.parse resp.to_str
