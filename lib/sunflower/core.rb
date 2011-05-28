@@ -3,6 +3,8 @@ require 'rest-client'
 require 'json'
 require 'cgi'
 
+class SunflowerError < StandardError; end
+
 # Main class. To start working, you have to create new Sunflower:
 #   s = Sunflower.new('en.wikipedia.org')
 # And then log in:
@@ -16,10 +18,9 @@ require 'cgi'
 # To log data to file, use #log method (works like puts). Use RestClient.log=<io> to log all requests.
 #
 # You can use multiple Sunflowers at once, to work on multiple wikis.
-
-class SunflowerError < StandardError; end
-
 class Sunflower
+	VERSION = '0.3'
+	
 	INVALID_CHARS = %w(# < > [ ] | { })
 	INVALID_CHARS_REGEX = Regexp.union *INVALID_CHARS
 	
@@ -69,7 +70,7 @@ class Sunflower
 		resp = RestClient.post(
 			'http://'+@wikiURL+'/w/api.php',
 			request,
-			{:user_agent => 'Sunflower alpha', :cookies => @cookies}
+			{:user_agent => "Sunflower #{VERSION} alpha", :cookies => @cookies}
 		)
 		JSON.parse resp.to_str
 	end
