@@ -1,51 +1,32 @@
-require 'sunflower-commontasks.rb'
-require 'sunflower-listmaker.rb'
+# coding: utf-8
 
-# EDIT WIKI URL BELOW
-s=Sunflower.new
+require 'sunflower'
+s = Sunflower.new.login
 
-print "Logging in to #{s.wikiURL}... "
-# EDIT USERNAME AND PASSWORD BELOW
-s.login
-print "done!\n"
+url = 'http://toolserver.org/~sk/cgi-bin/checkwiki/checkwiki.cgi?project=plwiki&view=bots&id=16&offset=0&limit=2500'
 
 print "Reading articles list... "
 # EDIT FILENAME BELOW
-str=HTTP.get(URI.parse('http://toolserver.org/~sk/cgi-bin/checkwiki/checkwiki.cgi?project=plwiki&view=bots&id=16&offset=0&limit=2500'))
-list=str[(str.index('<pre>')+5)...(str.index('</pre>'))].strip.split(/\r?\n/)
+str=Net::HTTP.get(URI.parse(url))
+list=str[(str.index('<pre>')+5)...(str.index('</pre>'))].strip.split(/\r?\n/).uniq
 print "done!\n\n"
 
 # EDIT SUMMARY BELOW
-$summary='poprawa znaków kontrolnych Unicode, [[WP:SK]]'
+s.summary='poprawa znaków kontrolnych Unicode, [[WP:SK]]'
 
-failcounter=0
 list.each do |title|
-	begin
-		print "Reading page #{title}... "
-		page=Page.get(title)
-		print "done.\n"
-		print "Modifying... "
+	print "Reading page #{title}... "
+	page=Page.new(title)
+	print "done.\n"
+	print "Modifying... "
 
-		page.replace(/﻿|‎|​/, "")
-		
-		
-		page.codeCleanup
-		
-		print "done.\n"
-		print "Saving... "
-		page.save
-		print "done!\n\n"
-	rescue
-		failcounter+=1
-		if failcounter<5
-			print "#{failcounter}th error, retrying!\n" 
-			redo
-		else
-			print "#{failcounter}th error!\n\n"
-			next
-		end
-	end
+	page.replace(/﻿|‎|​/, "")
+	
+	
+	page.code_cleanup
+	
+	print "done.\n"
+	print "Saving... "
+	page.save
+	print "done!\n\n"
 end
-
-print 'Finished! Press any key to close.'
-gets
