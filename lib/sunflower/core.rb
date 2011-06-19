@@ -91,7 +91,7 @@ class Sunflower
 		
 		# 1. get the login token
 		response = RestClient.post(
-			'http://'+@wikiURL+'/w/api.php?'+"action=login&lgname=#{user}&lgpassword=#{password}"+'&format=json', 
+			'http://'+@wikiURL+'/w/api.php?'+"action=login&lgname=#{CGI.escape user}&lgpassword=#{CGI.escape password}"+'&format=json', 
 			nil,
 			{:user_agent => 'Sunflower alpha'}
 		)
@@ -103,7 +103,7 @@ class Sunflower
 		
 		# 2. actually log in
 		response = RestClient.post(
-			'http://'+@wikiURL+'/w/api.php?'+"action=login&lgname=#{user}&lgpassword=#{password}&lgtoken=#{token}"+'&format=json',
+			'http://'+@wikiURL+'/w/api.php?'+"action=login&lgname=#{CGI.escape user}&lgpassword=#{CGI.escape password}&lgtoken=#{token}"+'&format=json',
 			nil,
 			{:user_agent => 'Sunflower alpha', :cookies => @cookies}
 		)
