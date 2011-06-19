@@ -113,14 +113,29 @@ class Page
 			end
 		}
 		str.gsub!(/\{\{\{(?:poprzednik|następca|pop|nast|lata|info|lang)\|(.+?)\}\}\}/i,'\1')
-		str.gsub!(/(={1,5})\s*Przypisy\s*\1\s*<references\s?\/>/){
+		str.gsub!(/(={1,5})\s*Przypisy\s*\1\s*<references\s?\/>/i){
 			if $1=='=' || $1=='=='
 				'{{Przypisy}}'
 			else
 				'{{Przypisy|stopień= '+$1+'}}'
 			end
 		}
-
+		
+		str.gsub!(/\[\[([^\|#\]]*)([^\|\]]*)(\||\]\])/){
+			name, anchor, _end = $1, $2, $3
+			
+			begin
+				name=CGI.unescape(name)
+				anchor=CGI.unescape((anchor||'').gsub(/\.([0-9A-F]{2})\.([0-9A-F]{2})/,'%\1%\2'))
+				a='[['+name+anchor+(_end||'')
+				a=a.gsub '_', ' '
+			rescue
+				a=('[['+name+(anchor||'')+(_end||'')).gsub '_', ' '
+			end
+			
+			a
+		}
+		
 		# sklejanie skrótów linkowych
 		str.gsub!(/m\.? ?\[\[n\.? ?p\.? ?m\.?\]\]/, 'm [[n.p.m.]]');
 
@@ -246,6 +261,6 @@ class Page
 	def change_category from, to
 		from=from.sub(/\A\s*([cC]ategory|[kK]ategoria):/, '').strip
 		to=to.sub(/\A\s*([cC]ategory|[kK]ategoria):/, '').strip
-		self.text = self.text.gsub!(/\[\[ *(?:[cC]ategory|[kK]ategoria) *: *#{Regexp.escape from} *(\|[^\]]+ *|)\]\]/){'[[Kategoria:'+to+$1.rstrip+']]'}
+		self.text = self.text.gsub(/\[\[ *(?:[cC]ategory|[kK]ategoria) *: *#{Regexp.escape from} *(\|[^\]]+ *|)\]\]/){'[[Kategoria:'+to+$1.rstrip+']]'}
 	end
 end
