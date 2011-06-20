@@ -208,6 +208,8 @@ class Page
 		r = r['query']['pages'].first
 		if r['missing']
 			@text = ''
+		elsif r['invalid']
+			raise SunflowerError, 'title invalid: '+@title
 		else
 			@text = r['revisions'][0]['*']
 		end
