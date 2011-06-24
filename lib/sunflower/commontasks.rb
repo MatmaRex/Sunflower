@@ -126,7 +126,7 @@ class Page
 			
 			begin
 				name=CGI.unescape(name)
-				anchor=CGI.unescape((anchor||'').gsub(/\.([0-9A-F]{2})\.([0-9A-F]{2})/,'%\1%\2'))
+				anchor=CGI.unescape((anchor||'').gsub(/\.([0-9A-F]{2})/,'%\1'))
 				a='[['+name+anchor+(_end||'')
 				a=a.gsub '_', ' '
 			rescue
