@@ -36,15 +36,23 @@ class Sunflower
 			list=r['query']['categorymembers'].map{|v| v['title']}
 			
 		when 'categoryr', 'categoryrecursive'
-			list=[] #list of articles
-			catsToProcess=[first] #list of categories to be processes
-			while !catsToProcess.empty?
-				list2=self.make_list('category',catsToProcess[0]) # get contents of first cat in list
-				catsToProcess=catsToProcess+list2.select{|el| el=~/\AKategoria:/} # find categories in it and queue them to be processes
-				catsToProcess.delete_at 0 # remove first category from list
-				list=list+list2 #add articles to main list
+			list = [] # list of articles
+			processed = []
+			cats_to_process = [first] # list of categories to be processes
+			while !cats_to_process.empty?
+				now = cats_to_process.shift
+				processed << now # make sure we do not get stuck in infinite loop
+				
+				list2 = self.make_list 'category', now # get contents of first cat in list
+				
+				 # find categories and queue them
+				cats_to_process += list2
+					.select{|el| el=~/\AKategoria:/}
+					.reject{|el| processed.include? el or cats_to_process.include? el}
+				
+				list += list2 # add articles to main list
 			end
-			list.uniq! #remove dupes
+			list.uniq!
 			
 		when 'linkson'
 			r=self.API('action=query&prop=links&pllimit=5000&titles='+firstE)
