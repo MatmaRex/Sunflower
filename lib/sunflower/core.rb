@@ -214,7 +214,7 @@ class Page
 			@text = r['revisions'][0]['*']
 		end
 		
-		@orig_text = @text
+		@orig_text = @text.dup
 		
 		@preloaded_text = true
 	end
