@@ -1,3 +1,4 @@
+#!usr/bin/env ruby
 require 'sunflower'
 
 
@@ -37,7 +38,7 @@ end
 
 if worked
 	puts "It seems to work!"
-	puts "WARNING! USER DOES NOT HAVE BOT RIGHTS!" if !s.isBot?
+	puts "WARNING! USER DOES NOT HAVE BOT RIGHTS!" if !s.is_bot?
 else
 	puts "Whoops, it didn't work. The error message is:"
 	puts error
