@@ -12,7 +12,7 @@ print "done!\n"
 print "Reading articles list... "
 # EDIT FILENAME BELOW
 list=s.make_list('file', 'multirefs.txt')
-print "done!\n\n"
+print "done (#{list.length} to do)!\n\n"
 
 # EDIT SUMMARY BELOW
 $summary='poprawa powtarzających się przypisów, [[WP:SK]]'

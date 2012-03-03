@@ -9,7 +9,7 @@ print "Reading articles list... "
 # EDIT FILENAME BELOW
 str=Net::HTTP.get(URI.parse(url))
 list=str[(str.index('<pre>')+5)...(str.index('</pre>'))].strip.split(/\r?\n/).uniq
-print "done!\n\n"
+print "done (#{list.length} to do)!\n\n"
 
 # EDIT SUMMARY BELOW
 s.summary='poprawa znaków kontrolnych Unicode, [[WP:SK]]'
@@ -21,9 +21,7 @@ list.each do |title|
 	print "Modifying... "
 
 	page.replace(/﻿|‎|​/, "")
-	
-	
-	page.code_cleanup
+	page.code_cleanup unless page.orig_text==page.text
 	
 	print "done.\n"
 	print "Saving... "
