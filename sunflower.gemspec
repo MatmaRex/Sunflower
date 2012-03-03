@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "sunflower"
-  s.version = "0.4"
+  s.version = "0.4.1"
   s.date = "2012-03-03"
   s.authors = ["Matma Rex"]
   s.email = "matma.rex@gmail.com"
