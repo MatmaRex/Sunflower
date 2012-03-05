@@ -261,6 +261,6 @@ class Page
 	def change_category from, to
 		from=from.sub(/\A\s*([cC]ategory|[kK]ategoria):/, '').strip
 		to=to.sub(/\A\s*([cC]ategory|[kK]ategoria):/, '').strip
-		self.text = self.text.gsub(/\[\[ *(?:[cC]ategory|[kK]ategoria) *: *#{Regexp.escape from} *(\|[^\]]+ *|)\]\]/){'[[Kategoria:'+to+$1.rstrip+']]'}
+		self.text = self.text.gsub(/\[\[ *(?:[cC]ategory|[kK]ategoria) *: *#{Regexp.escape from} *(\|[^\]]*|)\]\]/){'[[Kategoria:'+to+($1=='| ' ? $1 : $1.rstrip)+']]'}
 	end
 end
