@@ -1,5 +1,5 @@
-require 'sunflower-commontasks.rb'
-require 'sunflower-listmaker.rb'
+# coding: utf-8
+require 'sunflower'
 
 # EDIT WIKI URL BELOW
 s=Sunflower.new('pl.wikipedia.org')
