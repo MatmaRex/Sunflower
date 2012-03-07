@@ -8,7 +8,7 @@ url = 'http://toolserver.org/~sk/cgi-bin/checkwiki/checkwiki.cgi?project=plwiki&
 print "Reading articles list... "
 # EDIT FILENAME BELOW
 str=Net::HTTP.get(URI.parse(url))
-list=str[(str.index('<pre>')+5)...(str.index('</pre>'))].strip.split(/\r?\n/).uniq
+list=str[(str.index('<pre>')+5)...(str.index('</pre>'))].strip.gsub('&#039;', "'").split(/\r?\n/).uniq
 print "done (#{list.length} to do)!\n\n"
 
 # EDIT SUMMARY BELOW
