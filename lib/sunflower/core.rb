@@ -19,7 +19,7 @@ class SunflowerError < StandardError; end
 #
 # You can use multiple Sunflowers at once, to work on multiple wikis.
 class Sunflower
-	VERSION = '0.4.2'
+	VERSION = '0.4.3'
 	
 	INVALID_CHARS = %w(# < > [ ] | { })
 	INVALID_CHARS_REGEX = Regexp.union *INVALID_CHARS
