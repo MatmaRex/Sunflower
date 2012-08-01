@@ -168,7 +168,10 @@ class Page
 	attr_reader :sunflower
 	alias :belongs_to :sunflower
 	
+	# this is only for RDoc. wrapped in "if false" to avoid warnings when running with ruby -w
+	if false
 	attr_reader :pageid, :ns, :title, :touched, :lastrevid, :counter, :length, :starttimestamp, :edittoken, :protection #prop=info
+	end
 	
 	# calling any of these accessors will fetch the data.
 	[:pageid, :ns, :title, :touched, :lastrevid, :counter, :length, :starttimestamp, :edittoken, :protection].each do |meth|
