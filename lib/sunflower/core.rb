@@ -257,20 +257,19 @@ class Page
 			if !summary or summary==''
 				summary = @summaryAppend.uniq.join(', ')
 			else
-				summary =  summary.sub(/,\s*\Z/, '') + ', ' + @summaryAppend.uniq.join(', ')
+				summary = summary.sub(/,\s*\Z/, '') + ', ' + @summaryAppend.uniq.join(', ')
 			end
 		end
 		
 		if @orig_text==@text && title==@title
 			@sunflower.log('Page '+title+' not saved - no changes.')
-			return
+			return nil
 		end
-		
 		
 		
 		self.code_cleanup if @sunflower.always_do_code_cleanup && self.respond_to?('code_cleanup')
 		
-		r=@sunflower.API("action=edit&bot=1&title=#{CGI.escape(title)}&text=#{CGI.escape(@text)}&summary=#{CGI.escape(summary)}&token=#{CGI.escape(@edittoken)}")# if @sunflower.isBot?
+		return @sunflower.API("action=edit&bot=1&title=#{CGI.escape(title)}&text=#{CGI.escape(@text)}&summary=#{CGI.escape(summary)}&token=#{CGI.escape(@edittoken)}")
 	end
 	alias :put :save
 	
