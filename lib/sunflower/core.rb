@@ -29,14 +29,22 @@ class Sunflower
 		File.join(ENV['HOME'], 'sunflower-userdata')
 	end
 
-	# Options for this Sunflower.
-	attr_accessor :summary, :always_do_code_cleanup
-	attr_accessor :wikiURL
+	# Summary used when saving edits with this Sunflower.
+	attr_accessor :summary
+	# Whether to run #code_cleanup when calling #save.
+	attr_accessor :always_do_code_cleanup
+	# The URL this Sunflower works on, as provided as argument to #initialize.
+	attr_reader :wikiURL
 	
+	# Whether this user (if logged in) has bot rights.
 	def is_bot?; @is_bot; end
 	
-	attr_writer :warnings, :log
+	# Whether to output warning messages (using Kernel#warn). Defaults to true.
+	attr_writer :warnings
 	def warnings?; @warnings; end
+	
+	# Whether to output log messages (to a file named log.txt in current directory). Defaults to false.
+	attr_writer :log
 	def log?; @log; end
 	
 	# Initialize a new Sunflower working on a wiki with given URL, for ex. "pl.wikipedia.org".
@@ -145,8 +153,9 @@ class Sunflower
 		return self
 	end
 	
-	def log t
-		File.open('log.txt','a'){|f| f.puts t} if @log
+	# Log message to a file named log.txt in current directory, if logging is enabled. See #log= / #log?.
+	def log message
+		File.open('log.txt','a'){|f| f.puts message} if @log
 	end
 end
 
@@ -171,7 +180,8 @@ class Page
 	
 	# this is only for RDoc. wrapped in "if false" to avoid warnings when running with ruby -w
 	if false
-	attr_reader :pageid, :ns, :title, :touched, :lastrevid, :counter, :length, :starttimestamp, :edittoken, :protection #prop=info
+	# Return value of given attribute, as returned by API call prop=info for this page. Lazy-loaded.
+	attr_reader :pageid, :ns, :title, :touched, :lastrevid, :counter, :length, :starttimestamp, :edittoken, :protection
 	end
 	
 	# calling any of these accessors will fetch the data.
@@ -207,6 +217,7 @@ class Page
 		preload_text
 	end
 	
+	# Load the text of this page. Semi-private.
 	def preload_text
 		r = @sunflower.API('action=query&prop=revisions&rvprop=content&titles='+CGI.escape(@title))
 		r = r['query']['pages'].first
@@ -223,6 +234,7 @@ class Page
 		@preloaded_text = true
 	end
 	
+	# Load the metadata associated with this page. Semi-private.
 	def preload_attrs
 		r = @sunflower.API('action=query&prop=info&inprop=protection&intoken=edit&titles='+CGI.escape(@title))
 		r = r['query']['pages'].first
@@ -233,6 +245,7 @@ class Page
 		@preloaded_attrs = true
 	end
 	
+	# Save the current text of this page to file (which can be either a filename or an IO).
 	def dump_to file
 		if file.respond_to? :write #probably file or IO
 			file.write @text
@@ -241,10 +254,18 @@ class Page
 		end
 	end
 	
+	# Save the current text of this page to a file whose name is based on page title, with non-alphanumeric characters stripped.
 	def dump
 		self.dump_to @title.gsub(/[^a-zA-Z0-9\-]/,'_')+'.txt'
 	end
 	
+	# Save the modifications to this page, possibly under a different title. Default summary is this page's Sunflower's summary (see Sunflower#summary=).
+	# 
+	# Will not perform API request if no changes were made.
+	# 
+	# Will call #code_cleanup if Sunflower#always_do_code_cleanup is set.
+	# 
+	# Returns the JSON result of API call or nil when API call was not made.
 	def save title=@title, summary=nil
 		preload_attrs unless @preloaded_attrs
 		
