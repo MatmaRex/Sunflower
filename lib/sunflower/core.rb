@@ -69,7 +69,7 @@ class Sunflower
 		if request.is_a? String
 			request += '&format=json'
 		elsif request.is_a? Hash
-			request.merge!({format:'json'})
+			request = request.merge({format:'json'})
 		end
 		
 		resp = RestClient.post(
