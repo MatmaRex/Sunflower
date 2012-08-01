@@ -31,7 +31,7 @@ class Sunflower
 
 	# Options for this Sunflower.
 	attr_accessor :summary, :always_do_code_cleanup
-	attr_accessor :cookie, :headers, :wikiURL
+	attr_accessor :wikiURL
 	
 	def is_bot?; @is_bot; end
 	
