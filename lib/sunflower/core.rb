@@ -141,7 +141,7 @@ class Sunflower
 	end
 	
 	def log t
-		File.open('log.txt','a'){|f| f.puts t}
+		File.open('log.txt','a'){|f| f.puts t} if @log
 	end
 	
 	def is_bot?
