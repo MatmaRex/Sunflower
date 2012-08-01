@@ -31,8 +31,13 @@ class Sunflower
 
 	# Options for this Sunflower.
 	attr_accessor :summary, :always_do_code_cleanup
+	attr_accessor :cookie, :headers, :wikiURL
 	
-	attr_accessor :cookie, :headers, :wikiURL, :warnings, :log
+	def is_bot?; @is_bot; end
+	
+	attr_writer :warnings, :log
+	def warnings?; @warnings; end
+	def log?; @log; end
 	
 	# Initialize a new Sunflower working on a wiki with given URL, for ex. "pl.wikipedia.org".
 	def initialize url=nil
@@ -142,10 +147,6 @@ class Sunflower
 	
 	def log t
 		File.open('log.txt','a'){|f| f.puts t} if @log
-	end
-	
-	def is_bot?
-		@is_bot
 	end
 end
 
