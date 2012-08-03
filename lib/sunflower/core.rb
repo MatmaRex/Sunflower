@@ -35,6 +35,8 @@ class Sunflower
 	attr_accessor :always_do_code_cleanup
 	# The URL this Sunflower works on, as provided as argument to #initialize.
 	attr_reader :wikiURL
+	# Siteinfo, as returned by API call.
+	attr_accessor :siteinfo
 	
 	# Whether this user (if logged in) has bot rights.
 	def is_bot?; @is_bot; end
@@ -70,6 +72,9 @@ class Sunflower
 		@wikiURL=url
 		
 		@loggedin=false
+		
+		siprop = 'general|namespaces|namespacealiases|specialpagealiases|magicwords|interwikimap|dbrepllag|statistics|usergroups|extensions|fileextensions|rightsinfo|languages|skins|extensiontags|functionhooks|showhooks|variables'
+		@siteinfo = self.API(action: 'query', meta: 'siteinfo', siprop: siprop)['query']
 	end
 	
 	# Call the API. Returns a hash of JSON response. Request can be a HTTP request string or a hash.
