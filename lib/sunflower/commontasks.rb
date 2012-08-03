@@ -2,7 +2,6 @@
 # extends Page with some methods letting easily perform common tasks
 
 class Page
-	def execute commands
 	# executes methods on self
 	# "commands" is array of arrays
 	# page.execute([
@@ -18,6 +17,7 @@ class Page
 	# oi:module, only-if:module
 	# !oi:module, only-if-not:module
 	# s:append to summary, summary:append to summary
+	def execute commands
 		originalText = self.text.dup
 	
 		commands.each do |cmd|
@@ -75,9 +75,9 @@ class Page
 	
 	
 	
-	def replace from, to, once=false
 	# replaces "from" with "to" in page text
 	# "from" may be regex
+	def replace from, to, once=false
 		self.text = self.text.send( (once ? 'sub' : 'gsub'), from, to )
 	end
 	def gsub from, to
@@ -87,15 +87,15 @@ class Page
 		self.replace from, to, true
 	end
 	
-	def append txt, newlines=2
 	# appends newlines and text
 	# by default - 2 newlines
+	def append txt, newlines=2
 		self.text = self.text.rstrip + ("\n"*newlines) + txt
 	end
 	
-	def prepend txt, newlines=2
 	# prepends text and newlines
 	# by default - 2 newlines
+	def prepend txt, newlines=2
 		self.text = txt + ("\n"*newlines) + self.text.lstrip
 	end
 	
@@ -145,9 +145,9 @@ class Page
 		return str
 	end
 	
-	def code_cleanup
 	# simple, safe code cleanup
 	# use Sunflower.always_do_code_cleanup=true to do it automatically just before saving page
+	def code_cleanup
 		str = self.text.gsub /\r\n/, "\n"
 		
 		str.gsub!(/\[\[([^\|\]]+)(\||\]\])/){
