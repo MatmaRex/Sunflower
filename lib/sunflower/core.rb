@@ -258,7 +258,6 @@ class Page
 	
 	# The Sunflower instance this page belongs to.
 	attr_reader :sunflower
-	alias :belongs_to :sunflower
 	
 	# this is only for RDoc. wrapped in "if false" to avoid warnings when running with ruby -w
 	if false
