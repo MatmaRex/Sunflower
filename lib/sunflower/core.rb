@@ -244,22 +244,19 @@ class Sunflower
 	end
 end
 
-# Class representng single Wiki page. To load specified page, use #new/#get/#load method.
-#
-# When calling Page.new, at first only the text will be loaded - attributes and edit token will be loaded when needed, or when you call #preload_attrs.
-#
-# If you are using multiple Sunflowers, you have to specify which wiki this page belongs to using second argument of function; you can pass whole URL (same as when creating new Sunflower) or just language code.
-#
-# To save page, use #save/#put method. Optional argument is new title page, if ommited, page is saved at old title. Summary can be passed as second parameter. If it's ommited, s.summary is used. If it's empty too, error is raised.
-#
-# To get Sunflower instance which this page belongs to, use #sunflower of #belongs_to.
+# Class representing a single Wiki page. To load specified page, use #new. To save it back, use #save.
 class Page
+	# Characters which MediaWiki does not permit in page title.
 	INVALID_CHARS = %w(# < > [ ] | { })
+	# Regex matching characters which MediaWiki does not permit in page title.
 	INVALID_CHARS_REGEX = Regexp.union *INVALID_CHARS
 	
+	# The current text of the page.
 	attr_accessor :text
+	# The text of the page, as of when it was loaded.
 	attr_reader :orig_text
 	
+	# The Sunflower instance this page belongs to.
 	attr_reader :sunflower
 	alias :belongs_to :sunflower
 	
@@ -277,6 +274,9 @@ class Page
 		end
 	end
 	
+	# Load the specified page. Only the text will be immediately loaded - attributes and edit token will be loaded when needed, or when you call #preload_attrs.
+	#
+	# If you are using multiple Sunflowers, you have to specify which wiki this page belongs to using the second argument of function; you can pass whole URL (same as when creating new Sunflower) or just the language code.
 	def initialize title='', wiki=''
 		raise SunflowerError, 'title invalid: '+title if title =~ INVALID_CHARS_REGEX
 		
@@ -344,7 +344,7 @@ class Page
 		self.dump_to @title.gsub(/[^a-zA-Z0-9\-]/,'_')+'.txt'
 	end
 	
-	# Save the modifications to this page, possibly under a different title. Default summary is this page's Sunflower's summary (see Sunflower#summary=).
+	# Save the modifications to this page, possibly under a different title. Default summary is this page's Sunflower's summary (see Sunflower#summary=). Default title is the current title.
 	# 
 	# Will not perform API request if no changes were made.
 	# 
