@@ -75,6 +75,29 @@ class Sunflower
 		
 		siprop = 'general|namespaces|namespacealiases|specialpagealiases|magicwords|interwikimap|dbrepllag|statistics|usergroups|extensions|fileextensions|rightsinfo|languages|skins|extensiontags|functionhooks|showhooks|variables'
 		@siteinfo = self.API(action: 'query', meta: 'siteinfo', siprop: siprop)['query']
+		
+		_build_ns_map
+	end
+	
+	# Private. Massages data from siteinfo to be used for recognizing namespaces.
+	def _build_ns_map
+		@namespace_to_id = {} # all keys lowercase
+		@namespace_id_to_canon = {}
+		@namespace_id_to_local = {}
+		
+		@siteinfo['namespaces'].each_value do |h|
+			next if h['content']
+			
+			id = h['id'].to_i
+			@namespace_id_to_canon[id] = h['canonical']
+			@namespace_id_to_local[id] = h['*']
+			
+			@namespace_to_id[ h['canonical'].downcase ] = id
+			@namespace_to_id[ h['*'].downcase ] = id
+		end
+		@siteinfo['namespacealiases'].each do |h|
+			@namespace_to_id[ h['*'].downcase ] = h['id'].to_i
+		end
 	end
 	
 	# Call the API. Returns a hash of JSON response. Request can be a HTTP request string or a hash.
@@ -161,6 +184,63 @@ class Sunflower
 	# Log message to a file named log.txt in current directory, if logging is enabled. See #log= / #log?.
 	def log message
 		File.open('log.txt','a'){|f| f.puts message} if @log
+	end
+	
+	# Cleans up underscores, percent-encoding and title-casing in title (with optional anchor).
+	def cleanup_title title
+		name, anchor = title.split '#', 2
+		
+		# CGI.unescape also changes pluses to spaces; code borrowed from there
+		unescape = lambda{|a| a.gsub(/((?:%[0-9a-fA-F]{2})+)/){ [$1.delete('%')].pack('H*') } }
+		
+		ns = nil
+		name = unescape.call(name).gsub(/[ _]+/, ' ').strip
+		anchor = unescape.call(anchor.gsub(/\.([0-9a-fA-F]{2})/, '%\1')).gsub(/[ _]+/, ' ').strip if anchor
+		
+		# FIXME unicode? downcase, upcase
+		
+		if name.include? ':'
+			maybe_ns, part_name = name.split ':', 2
+			if ns_id = @namespace_to_id[maybe_ns.strip.downcase]
+				ns, name = @namespace_id_to_local[ns_id], part_name.strip
+			end
+		end
+		
+		name[0] = name[0].upcase if @siteinfo["general"]["case"] == "first-letter"
+		
+		return [ns ? "#{ns}:" : nil,  name,  anchor ? "##{anchor}" : nil].join ''
+	end
+	
+	# Returns the localized namespace name for ns, which may be namespace number, canonical name, or any namespace alias.
+	# 
+	# Returns nil if passed an invalid namespace.
+	def ns_local_for ns
+		case ns
+		when Numeric
+			@namespace_id_to_local[ns.to_i]
+		when String
+			@namespace_id_to_local[ @namespace_to_id[cleanup_title(ns).downcase] ]
+		end
+	end
+	
+	# Like #ns_local_for, but returns canonical (English) name.
+	def ns_canon_for ns
+		case ns
+		when Numeric
+			@namespace_id_to_canon[ns.to_i]
+		when String
+			@namespace_id_to_canon[ @namespace_to_id[cleanup_title(ns).downcase] ]
+		end
+	end
+	
+	# Returns a regular expression that will match given namespace. Rules for input like #ns_local_for.
+	# 
+	# Does NOT handle percent-encoding and underscores. Use #cleanup_title to canonicalize the namespace first.
+	def ns_regex_for ns
+		id = ns.is_a?(Numeric) ? ns.to_i : @namespace_to_id[cleanup_title(ns).downcase]
+		return nil if !id
+		
+		/#{@namespace_to_id.to_a.select{|a| a[1] == id }.map{|a| Regexp.escape a[0] }.join '|' }/i
 	end
 end
 
