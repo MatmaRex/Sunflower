@@ -99,19 +99,11 @@ class Page
 		self.text = txt + ("\n"*newlines) + self.text.lstrip
 	end
 	
-	def code_cleanup
-	# simple, safe code cleanup
-	# use Sunflower.always_do_code_cleanup=true to do it automatically just before saving page
+	# plwiki-specific cleanup routines.
 	# based on Nux's cleaner: http://pl.wikipedia.org/wiki/Wikipedysta:Nux/wp_sk.js
-		str=self.text.gsub(/\r\n/,"\n")
+	def code_cleanup_plwiki str
+		str = str.dup
 		
-		str.gsub!(/\{\{\s*([^|{}]+ |uni|)stub2?(\|[^{}]+)?\}\}/i){
-			if $1=='sekcja '
-				'{{sekcja stub}}'
-			else
-				'{{stub}}'
-			end
-		}
 		str.gsub!(/\{\{\{(?:poprzednik|następca|pop|nast|lata|info|lang)\|(.+?)\}\}\}/i,'\1')
 		str.gsub!(/(={1,5})\s*Przypisy\s*\1\s*<references\s?\/>/i){
 			if $1=='=' || $1=='=='
@@ -119,21 +111,6 @@ class Page
 			else
 				'{{Przypisy|stopień= '+$1+'}}'
 			end
-		}
-		
-		str.gsub!(/\[\[([^\|#\]]*)([^\|\]]*)(\||\]\])/){
-			name, anchor, _end = $1, $2, $3
-			
-			begin
-				name = name.gsub(/((?:%[0-9a-fA-F]{2})+)/){ [$1.delete('%')].pack('H*') }
-				anchor = (anchor||'').gsub(/\.([0-9A-F]{2})/, '%\1').gsub(/((?:%[0-9a-fA-F]{2})+)/){ [$1.delete('%')].pack('H*') }
-				a='[['+name+anchor+(_end||'')
-				a=a.gsub '_', ' '
-			rescue
-				a=('[['+name+(anchor||'')+(_end||'')).gsub '_', ' '
-			end
-			
-			a
 		}
 		
 		# sklejanie skrótów linkowych
@@ -165,20 +142,31 @@ class Page
 		str.gsub!(/[ \n\t]*\n'''? *((Zewnętrzn[ey] )?(Linki?|Łącza|Stron[ay]|Zobacz w (internecie|sieci))( zewn[eę]trzn[aey])?):* *'''?[ \n\t]*/i, "\n\n== Linki zewnętrzne ==\n");
 		str.gsub!(/[ \n\t]*\n(=+) *((Zewnętrzn[ey] )?(Linki?|Łącza|Stron[ay]|Zobacz w (internecie|sieci))( zewn[eę]trzn[aey])?):* *=+[ \n\t]*/i, "\n\n\\1 Linki zewnętrzne \\1\n");
 
-		# nagłówki
+		return str
+	end
+	
+	def code_cleanup
+	# simple, safe code cleanup
+	# use Sunflower.always_do_code_cleanup=true to do it automatically just before saving page
+		str = self.text.gsub /\r\n/, "\n"
+		
+		str.gsub!(/\[\[([^\|\]]+)(\||\]\])/){
+			name, rest = $1, $2
+			"[[#{self.sunflower.cleanup_title name}#{rest}"
+		}
+		
+		# headings
 		str.gsub!(/(^|\n)(=+) *([^=\n]*[^ :=\n])[ :]*=/, '\1\2 \3 ='); # =a= > = a =, =a:= > = a =
-		str.gsub!(/(^|\n)(=+[^=\n]+=+)[\n]{2,}/, "\\1\\2\n");	# jeden \n
+		str.gsub!(/(^|\n)(=+[^=\n]+=+)[\n]{2,}/, "\\1\\2\n"); # one newline
 
-		# listy ze spacjami
+		# spaced lists
 		str.gsub!(/(\n[#*:;]+)([^ \t\n#*:;{])/, '\1 \2');
 		
-		# poprawa nazw przestrzeni i drobne okoliczne
-		str.gsub!(/\[\[(:?) *(image|grafika|file|plik) *: *([^ ])/i){'[['+$1+'Plik:'+$3.upcase}
-		str.gsub!(/\[\[(:?) *(category|kategoria) *: *([^ ])/i){'[['+$1+'Kategoria:'+$3.upcase}
-		str.gsub!(/\[\[ *(:?) *(template|szablon) *: *([^ ])/i){'[['+'Szablon:'+$3.upcase}
-		str.gsub!(/\[\[ *(:?) *(special|specjalna) *: *([^ ])/i){'[['+'Specjalna:'+$3.upcase}
-		
-		3.times { str.gsub!('{{stub}}{{stub}}', '{{stub}}') }
+		if wikiid = self.sunflower.siteinfo['general']['wikiid']
+			if self.respond_to? :"code_cleanup_#{wikiid}"
+				str = self.call :"code_cleanup_#{wikiid}", str
+			end
+		end
 		
 		self.text = str
 	end
