@@ -282,15 +282,15 @@ class Page
 		@modulesExecd=[] #used by sunflower-commontasks.rb
 		@summaryAppend=[] #used by sunflower-commontasks.rb
 		
-		@title=title
-		wiki=wiki+'.wikipedia.org' if wiki.index('.')==nil && wiki!=''
-		
 		if wiki=='' 
 			count=ObjectSpace.each_object(Sunflower){|o| @sunflower=o}
 			raise SunflowerError, 'you must pass wiki name if using multiple Sunflowers at once!' if count>1
 		else
 			ObjectSpace.each_object(Sunflower){|o| @sunflower=o if o.wikiURL==wiki}
 		end
+		
+		@title = self.sunflower.cleanup_title title
+		wiki = wiki+'.wikipedia.org' if wiki.index('.')==nil && wiki!=''
 		
 		if title==''
 			@text=''
