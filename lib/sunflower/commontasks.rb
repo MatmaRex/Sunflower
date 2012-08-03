@@ -170,10 +170,18 @@ class Page
 		
 		self.text = str
 	end
-	
+
+	# Replace the category from with category to in page wikitext.
+	# 
+	# Inputs can be either with the Category: prefix (or localised version) or without.
 	def change_category from, to
-		from=from.sub(/\A\s*([cC]ategory|[kK]ategoria):/, '').strip
-		to=to.sub(/\A\s*([cC]ategory|[kK]ategoria):/, '').strip
-		self.text = self.text.gsub(/\[\[ *(?:[cC]ategory|[kK]ategoria) *: *#{Regexp.escape from} *(\|[^\]]*|)\]\]/){'[[Kategoria:'+to+($1=='| ' ? $1 : $1.rstrip)+']]'}
+		cat_regex = self.sunflower.ns_regex_for 'Category'
+		from = self.sunflower.cleanup_title(from).sub(/^#{cat_regex}:/, '')
+		to   = self.sunflower.cleanup_title(to  ).sub(/^#{cat_regex}:/, '')
+		
+		self.text.gsub!(/\[\[ *#{cat_regex} *: *#{Regexp.escape from} *(\||\]\])/){
+			rest = $1
+			"[[#{self.sunflower.ns_local_for 'Category'}:#{to}#{rest}"
+		}
 	end
 end
