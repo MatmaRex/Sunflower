@@ -114,7 +114,7 @@ class Sunflower
 			redirs=(parameters[2] ? '&redirects=on' : '')
 			list=[]
 			
-			p=HTTP.get(URI.parse("http://toolserver.org/~nikola/grep.php?pattern=#{firstE}&lang=#{split[0]}&wiki=#{split[1]}&ns=#{ns}#{redirs}"))
+			p=Net::HTTP.get(URI.parse("http://toolserver.org/~nikola/grep.php?pattern=#{firstE}&lang=#{split[0]}&wiki=#{split[1]}&ns=#{ns}#{redirs}"))
 			p.scan(/<tr><td><a href="http:\/\/#{@wikiURL}\/wiki\/([^#<>\[\]\|\{\}]+?)(?:\?redirect=no|)">/){
 				list<<CGI.unescape($1).gsub('_',' ')
 			}
