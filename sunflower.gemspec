@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
 		lib/sunflower.rb
 		lib/sunflower/core.rb
 		lib/sunflower/commontasks.rb
-		lib/sunflower/listmaker.rb
+		lib/sunflower/list.rb
 		scripts/fix-bold-in-headers.rb
 		scripts/fix-multiple-same-refs.rb
 		scripts/fix-langs.rb
