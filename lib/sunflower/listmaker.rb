@@ -35,7 +35,7 @@ class Sunflower
 				
 				 # find categories and queue them
 				cats_to_process += list2
-					.select{|el| el=~/\AKategoria:/}
+					.select{|el| el =~ /^#{self.ns_regex_for 'category'}:/}
 					.reject{|el| processed.include? el or cats_to_process.include? el}
 				
 				list += list2 # add articles to main list
