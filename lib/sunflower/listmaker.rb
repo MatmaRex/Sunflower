@@ -28,11 +28,11 @@ class Sunflower
 			end
 			
 		when 'categorieson'
-			r=self.API('action=query&prop=categories&cllimit=max&titles='+firstE)
+			r = self.API_continued('action=query&prop=categories&cllimit=max&titles='+firstE, 'pages', 'clcontinue')
 			list=r['query']['pages'].first['categories'].map{|v| v['title']}
 			
 		when 'category'
-			r=self.API('action=query&list=categorymembers&cmprop=title&cmlimit=max&cmtitle='+firstE)
+			r = self.API_continued('action=query&list=categorymembers&cmprop=title&cmlimit=max&cmtitle='+firstE, 'categorymembers', 'cmcontinue')
 			list=r['query']['categorymembers'].map{|v| v['title']}
 			
 		when 'categoryr', 'categoryrecursive'
@@ -55,43 +55,43 @@ class Sunflower
 			list.uniq!
 			
 		when 'linkson'
-			r=self.API('action=query&prop=links&pllimit=max&titles='+firstE)
+			r = self.API_continued('action=query&prop=links&pllimit=max&titles='+firstE, 'pages', 'plcontinue')
 			list=r['query']['pages'].first['links'].map{|v| v['title']}
 			
 		when 'transclusionson', 'templateson'
-			r=self.API('action=query&prop=templates&tllimit=max&titles='+firstE)
+			r = self.API_continued('action=query&prop=templates&tllimit=max&titles='+firstE, 'pages', 'tlcontinue')
 			list=r['query']['pages'].first['templates'].map{|v| v['title']}
 			
 		when 'usercontribs', 'contribs'
-			r=self.API('action=query&list=usercontribs&uclimit=max&ucprop=title&ucuser='+firstE)
+			r = self.API_continued('action=query&list=usercontribs&uclimit=max&ucprop=title&ucuser='+firstE, 'usercontribs', 'uccontinue')
 			list=r['query']['usercontribs'].map{|v| v['title']}
 			
 		when 'whatlinksto', 'whatlinkshere'
-			r=self.API('action=query&list=backlinks&bllimit=max&bltitle='+firstE)
+			r = self.API_continued('action=query&list=backlinks&bllimit=max&bltitle='+firstE, 'backlinks', 'blcontinue')
 			list=r['query']['backlinks'].map{|v| v['title']}
 			
 		when 'whattranscludes', 'whatembeds'
-			r=self.API('action=query&list=embeddedin&eilimit=max&eititle='+firstE)
+			r = self.API_continued('action=query&list=embeddedin&eilimit=max&eititle='+firstE, 'embeddedin', 'eicontinue')
 			list=r['query']['embeddedin'].map{|v| v['title']}
 			
 		when 'image', 'imageusage'
-			r=self.API('action=query&list=imageusage&iulimit=max&iutitle='+firstE)
+			r = self.API_continued('action=query&list=imageusage&iulimit=max&iutitle='+firstE, 'imageusage', 'iucontinue')
 			list=r['query']['imageusage'].map{|v| v['title']}
 			
 		when 'search'
-			r=self.API('action=query&list=search&srwhat=text&srlimit=max&srnamespace='+(parameters[1]=='allns' ? CGI.escape('0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|100|101|102|103') : '0')+'&srsearch='+firstE)
+			r = self.API_continued('action=query&list=search&srwhat=text&srlimit=max&srnamespace='+(parameters[1]=='allns' ? CGI.escape('0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|100|101|102|103') : '0')+'&srsearch='+firstE, 'search', 'srcontinue')
 			list=r['query']['search'].map{|v| v['title']}
 			
 		when 'searchtitles'
-			r=self.API('action=query&list=search&srwhat=title&srlimit=max&srnamespace='+(parameters[1]=='allns' ? CGI.escape('0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|100|101|102|103') : '0')+'&srsearch='+firstE)
+			r = self.API_continued('action=query&list=search&srwhat=title&srlimit=max&srnamespace='+(parameters[1]=='allns' ? CGI.escape('0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|100|101|102|103') : '0')+'&srsearch='+firstE, 'search', 'srcontinue')
 			list=r['query']['search'].map{|v| v['title']}
 		
 		when 'random'
-			r=self.API('action=query&list=random&rnnamespace=0&rnlimit='+firstE)
+			r = self.API_continued('action=query&list=random&rnnamespace=0&rnlimit='+firstE, 'random', 'rncontinue')
 			list=r['query']['random'].map{|v| v['title']}
 			
 		when 'external', 'linksearch'
-			r=self.API('action=query&euprop=title&list=exturlusage&eulimit=max&euquery='+firstE)
+			r = self.API_continued('action=query&list=exturlusage&eulimit=max&euprop=title&euquery='+firstE, 'exturlusage', 'eucontinue')
 			list=r['query']['exturlusage'].map{|v| v['title']}
 			
 		when 'google'
