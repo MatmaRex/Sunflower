@@ -116,6 +116,48 @@ class Sunflower
 		JSON.parse resp.to_str
 	end
 	
+	# Call the API. While more results are available via the xxcontinue parameter, call it again. 
+	# 
+	# Assumes action=query. 
+	# 
+	# By default returns an array of all API responses. Attempts to merge the responses
+	# into a response that would have been returned if the limit was infinite. merge_on is
+	# the key of response['query'] to merge consecutive responses on.
+	# 
+	# If limit given, will perform no more than this many API calls before returning.
+	# If limit is 1, behaves exactly like #API.
+	# 
+	# Example: get list of all pages linking to Main Page:
+	#   
+	#   sunflower.API_continued "action=query&list=backlinks&bllimit=max&bltitle=Main_Page", 'backlinks', 'blcontinue'
+	def API_continued request, merge_on, xxcontinue, limit=nil
+		out = []
+		
+		# gather
+		res = self.API(request)
+		out << res
+		while res['query-continue'] and (!limit || out.length < limit)
+			api_endpoint = if request.is_a? String
+				request + "&#{xxcontinue}=#{res["query-continue"][merge_on][xxcontinue]}"
+			elsif request.is_a? Hash
+				request.merge({xxcontinue => res["query-continue"][merge_on][xxcontinue]})
+			end
+			
+			res = self.API(api_endpoint)
+			out << res
+		end
+		
+		# merge
+		merged = out[0]
+		meth = (merged['query'][merge_on].is_a?(Hash) ? :merge! : :concat)
+		
+		out.drop(1).each do |cur|
+			merged['query'][merge_on].send meth, cur['query'][merge_on]
+		end
+		
+		return merged
+	end
+	
 	# Log in using given info.
 	def login user='', password=''
 		if user=='' || password==''
