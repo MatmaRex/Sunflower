@@ -17,7 +17,7 @@ class Sunflower
 			
 		when 'categorieson'
 			r = self.API_continued('action=query&prop=categories&cllimit=max&titles='+firstE, 'pages', 'clcontinue')
-			list=r['query']['pages'].first['categories'].map{|v| v['title']}
+			list=r['query']['pages'].values.first['categories'].map{|v| v['title']}
 			
 		when 'category'
 			r = self.API_continued('action=query&list=categorymembers&cmprop=title&cmlimit=max&cmtitle='+firstE, 'categorymembers', 'cmcontinue')
@@ -44,11 +44,11 @@ class Sunflower
 			
 		when 'linkson'
 			r = self.API_continued('action=query&prop=links&pllimit=max&titles='+firstE, 'pages', 'plcontinue')
-			list=r['query']['pages'].first['links'].map{|v| v['title']}
+			list=r['query']['pages'].values.first['links'].map{|v| v['title']}
 			
 		when 'transclusionson', 'templateson'
 			r = self.API_continued('action=query&prop=templates&tllimit=max&titles='+firstE, 'pages', 'tlcontinue')
-			list=r['query']['pages'].first['templates'].map{|v| v['title']}
+			list=r['query']['pages'].values.first['templates'].map{|v| v['title']}
 			
 		when 'usercontribs', 'contribs'
 			r = self.API_continued('action=query&list=usercontribs&uclimit=max&ucprop=title&ucuser='+firstE, 'usercontribs', 'uccontinue')

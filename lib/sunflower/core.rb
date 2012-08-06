@@ -350,7 +350,7 @@ class Page
 	# Load the text of this page. Semi-private.
 	def preload_text
 		r = @sunflower.API('action=query&prop=revisions&rvprop=content&titles='+CGI.escape(@title))
-		r = r['query']['pages'].first
+		r = r['query']['pages'].values.first
 		if r['missing']
 			@text = ''
 		elsif r['invalid']
@@ -367,7 +367,7 @@ class Page
 	# Load the metadata associated with this page. Semi-private.
 	def preload_attrs
 		r = @sunflower.API('action=query&prop=info&inprop=protection&intoken=edit&titles='+CGI.escape(@title))
-		r = r['query']['pages'].first
+		r = r['query']['pages'].values.first
 		r.each{|key, value|
 			self.instance_variable_set('@'+key, value)
 		}
@@ -432,11 +432,3 @@ class Page
 		Page.new(title, wiki)
 	end
 end
-
-class Hash
-	# just a lil patch
-	def first
-		self.values[0]
-	end
-end
-
