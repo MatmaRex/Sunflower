@@ -15,18 +15,6 @@ class Sunflower
 		when 'page', 'pages'
 			list=parameters
 			
-		when 'input'
-			puts 'Insert titles of articles to edit:'
-			puts 'Press [Enter] without inputting any text to finish.'
-			puts 'Press [Ctrl]+[C] to kill bot.'
-			list=[]
-			while true
-				input=gets.strip
-				break if input==''
-				
-				list<<input
-			end
-			
 		when 'categorieson'
 			r = self.API_continued('action=query&prop=categories&cllimit=max&titles='+firstE, 'pages', 'clcontinue')
 			list=r['query']['pages'].first['categories'].map{|v| v['title']}
@@ -93,20 +81,6 @@ class Sunflower
 		when 'external', 'linksearch'
 			r = self.API_continued('action=query&list=exturlusage&eulimit=max&euprop=title&euquery='+firstE, 'exturlusage', 'eucontinue')
 			list=r['query']['exturlusage'].map{|v| v['title']}
-			
-		when 'google'
-			limit=[parameters[1].to_i,999].min
-			from=0
-			list=[]
-			
-			while from<limit
-				p=HTTP.get(URI.parse("http://www.google.pl/custom?q=kot&start=#{from}&sitesearch=#{@wikiURL}"))
-				p.scan(/<div class=g><h2 class=r><a href="http:\/\/#{@wikiURL}\/wiki\/([^#<>\[\]\|\{\}]+?)" class=l>/){
-					list<<CGI.unescape($1).gsub('_',' ')
-				}
-				
-				from+=10
-			end
 		
 		when 'grep', 'regex', 'regexp'
 			split=@wikiURL.split('.')
