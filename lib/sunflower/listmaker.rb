@@ -1,134 +1,208 @@
 # coding: utf-8
-class Sunflower
-	# Makes a list of articles. Returns array of titles.
-	def make_list type, *parameters
-		type=type.downcase.gsub(/[^a-z]/, '')
-		first=parameters[0]
-		firstE=CGI.escape first.to_s
+
+# Class representing a list of articles. Inherits from Array.
+class Sunflower::List < Array
+	# Create a new article list and fill it with items.
+	# 
+	# Sunflower may be nil; this will, however, make most several methods unavailable.
+	# 
+	# This is in fact a wrapper for various list generator methods,
+	# each private, named with the format of "list_<type>",
+	# which accept the key and opts arguments and return arrays.
+	# You can use this behavior to create your own ones.
+	def initialize sunflower, type, key, opts={}
+		@sunflower = sunflower
 		
-		case type
-		when 'file'
-			f=File.open first
-			list=f.read.sub(/\357\273\277/,'').strip.split(/\r?\n/)
-			f.close
-			
-		when 'page', 'pages'
-			list=parameters
-			
-		when 'categorieson'
-			r = self.API_continued('action=query&prop=categories&cllimit=max&titles='+firstE, 'pages', 'clcontinue')
-			list=r['query']['pages'].values.first['categories'].map{|v| v['title']}
-			
-		when 'category'
-			r = self.API_continued('action=query&list=categorymembers&cmprop=title&cmlimit=max&cmtitle='+firstE, 'categorymembers', 'cmcontinue')
-			list=r['query']['categorymembers'].map{|v| v['title']}
-			
-		when 'categoryr', 'categoryrecursive'
-			list = [] # list of articles
-			processed = []
-			cats_to_process = [first] # list of categories to be processes
-			while !cats_to_process.empty?
-				now = cats_to_process.shift
-				processed << now # make sure we do not get stuck in infinite loop
-				
-				list2 = self.make_list 'category', now # get contents of first cat in list
-				
-				 # find categories and queue them
-				cats_to_process += list2
-					.select{|el| el =~ /^#{self.ns_regex_for 'category'}:/}
-					.reject{|el| processed.include? el or cats_to_process.include? el}
-				
-				list += list2 # add articles to main list
-			end
-			list.uniq!
-			
-		when 'linkson'
-			r = self.API_continued('action=query&prop=links&pllimit=max&titles='+firstE, 'pages', 'plcontinue')
-			list=r['query']['pages'].values.first['links'].map{|v| v['title']}
-			
-		when 'transclusionson', 'templateson'
-			r = self.API_continued('action=query&prop=templates&tllimit=max&titles='+firstE, 'pages', 'tlcontinue')
-			list=r['query']['pages'].values.first['templates'].map{|v| v['title']}
-			
-		when 'usercontribs', 'contribs'
-			r = self.API_continued('action=query&list=usercontribs&uclimit=max&ucprop=title&ucuser='+firstE, 'usercontribs', 'uccontinue')
-			list=r['query']['usercontribs'].map{|v| v['title']}
-			
-		when 'whatlinksto', 'whatlinkshere'
-			r = self.API_continued('action=query&list=backlinks&bllimit=max&bltitle='+firstE, 'backlinks', 'blcontinue')
-			list=r['query']['backlinks'].map{|v| v['title']}
-			
-		when 'whattranscludes', 'whatembeds'
-			r = self.API_continued('action=query&list=embeddedin&eilimit=max&eititle='+firstE, 'embeddedin', 'eicontinue')
-			list=r['query']['embeddedin'].map{|v| v['title']}
-			
-		when 'image', 'imageusage'
-			r = self.API_continued('action=query&list=imageusage&iulimit=max&iutitle='+firstE, 'imageusage', 'iucontinue')
-			list=r['query']['imageusage'].map{|v| v['title']}
-			
-		when 'search'
-			r = self.API_continued('action=query&list=search&srwhat=text&srlimit=max&srnamespace='+(parameters[1]=='allns' ? CGI.escape('0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|100|101|102|103') : '0')+'&srsearch='+firstE, 'search', 'srcontinue')
-			list=r['query']['search'].map{|v| v['title']}
-			
-		when 'searchtitles'
-			r = self.API_continued('action=query&list=search&srwhat=title&srlimit=max&srnamespace='+(parameters[1]=='allns' ? CGI.escape('0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|100|101|102|103') : '0')+'&srsearch='+firstE, 'search', 'srcontinue')
-			list=r['query']['search'].map{|v| v['title']}
-		
-		when 'random'
-			r = self.API_continued('action=query&list=random&rnnamespace=0&rnlimit='+firstE, 'random', 'rncontinue')
-			list=r['query']['random'].map{|v| v['title']}
-			
-		when 'external', 'linksearch'
-			r = self.API_continued('action=query&list=exturlusage&eulimit=max&euprop=title&euquery='+firstE, 'exturlusage', 'eucontinue')
-			list=r['query']['exturlusage'].map{|v| v['title']}
-		
-		when 'grep', 'regex', 'regexp'
-			split=@wikiURL.split('.')
-			ns=(parameters[1] ? parameters[1].to_s.gsub(/\D/,'') : '0')
-			redirs=(parameters[2] ? '&redirects=on' : '')
-			list=[]
-			
-			p=Net::HTTP.get(URI.parse("http://toolserver.org/~nikola/grep.php?pattern=#{firstE}&lang=#{split[0]}&wiki=#{split[1]}&ns=#{ns}#{redirs}"))
-			p.scan(/<tr><td><a href="http:\/\/#{@wikiURL}\/wiki\/([^#<>\[\]\|\{\}]+?)(?:\?redirect=no|)">/){
-				list<<CGI.unescape($1).gsub('_',' ')
-			}
+		meth = :"list_#{type}"
+		if self.respond_to? meth, true
+			super(self.send meth, key, opts)
+		else
+			raise SunflowerError, "no such list type available: #{type}"
 		end
+	end
+	
+	# Construct new list from an array.
+	def self.from_ary ary, sunflower=nil
+		Sunflower::List.new sunflower, 'pages', ary
+	end
+	
+	
+	
+private
+	# Can be used to create a new list from array. Used internally in .from_ary.
+	def list_pages ary, opts={}
+		ary
+	end
+	
+	# Create from plaintext list, each title in separate line.
+	def list_plaintext text, opts={}
+		text.split(/\r?\n/)
+	end
+	
+	# Create from file. Supports BOM in UTF-8 files.
+	def list_file filename, opts={}
+		lines = File.readlines(filename)
+		lines[0].sub!(/^\357\273\277/, '') # BOM
+		lines.each{|ln| ln.chomp! }
+		lines.pop while lines.last == ''
+		lines
+	end
+	
+	# Categories on given page.
+	def list_categories_on page, opts={}
+		r = @sunflower.API_continued('action=query&prop=categories&cllimit=max&titles='+CGI.escape(page), 'pages', 'clcontinue')
+		r['query']['pages'].values.first['categories'].map{|v| v['title']}
+	end
+	
+	# Category members.
+	def list_category cat, opts={}
+		r = @sunflower.API_continued('action=query&list=categorymembers&cmprop=title&cmlimit=max&cmtitle='+CGI.escape(cat), 'categorymembers', 'cmcontinue')
+		r['query']['categorymembers'].map{|v| v['title']}
+	end
+	
+	# Category members. Scans categories recursively.
+	def list_category_recursive cat, opts={}
+		list = [] # list of articles
+		processed = []
+		cats_to_process = [cat] # list of categories to be processes
+		while !cats_to_process.empty?
+			now = cats_to_process.shift
+			processed << now # make sure we do not get stuck in infinite loop
+			
+			list2 = list_category now # get contents of first cat in list
+			
+			 # find categories and queue them
+			cats_to_process += list2
+				.select{|el| el =~ /^#{@sunflower.ns_regex_for 'category'}:/}
+				.reject{|el| processed.include? el or cats_to_process.include? el}
+			
+			list += list2 # add articles to main list
+		end
+		list.uniq!
+		return list
+	end
+	
+	# Links on given page.
+	def list_links_on page, opts={}
+		r = @sunflower.API_continued('action=query&prop=links&pllimit=max&titles='+CGI.escape(page), 'pages', 'plcontinue')
+		r['query']['pages'].values.first['links'].map{|v| v['title']}
+	end
+	
+	# Templates used on given page.
+	def list_templates_on page, opts={}
+		r = @sunflower.API_continued('action=query&prop=templates&tllimit=max&titles='+CGI.escape(page), 'pages', 'tlcontinue')
+		r['query']['pages'].values.first['templates'].map{|v| v['title']}
+	end
+	
+	# Pages edited by given user.
+	def list_contribs user, opts={}
+		r = @sunflower.API_continued('action=query&list=usercontribs&uclimit=max&ucprop=title&ucuser='+CGI.escape(user), 'usercontribs', 'uccontinue')
+		r['query']['usercontribs'].map{|v| v['title']}
+	end
+	
+	# Pages which link to given page.
+	def list_whatlinkshere page, opts={}
+		r = @sunflower.API_continued('action=query&list=backlinks&bllimit=max&bltitle='+CGI.escape(page), 'backlinks', 'blcontinue')
+		r['query']['backlinks'].map{|v| v['title']}
+	end
+	
+	# Pages which embed (transclude) given page.
+	def list_whatembeds page, opts={}
+		r = @sunflower.API_continued('action=query&list=embeddedin&eilimit=max&eititle='+CGI.escape(page), 'embeddedin', 'eicontinue')
+		r['query']['embeddedin'].map{|v| v['title']}
+	end
+	
+	# Pages which used given image.
+	def list_image_usage image, opts={}
+		r = @sunflower.API_continued('action=query&list=imageusage&iulimit=max&iutitle='+CGI.escape(image), 'imageusage', 'iucontinue')
+		r['query']['imageusage'].map{|v| v['title']}
+	end
+	
+	# Search results for given text.
+	# 
+	# Options:
+	#   ns: namespaces to search in, as pipe-separated numbers (or single number). Default: 0 (main).
+	def list_search text, opts={}
+		opts = {ns: 0}.merge opts
+		r = @sunflower.API_continued('action=query&list=search&srwhat=text&srlimit=max&srnamespace='+CGI.escape(opts[:ns].to_s)+'&srsearch='+CGI.escape(text), 'search', 'srcontinue')
+		r['query']['search'].map{|v| v['title']}
+	end
+	
+	# Search results for given text. Only searches in page titles. See also #list_grep.
+	# 
+	# Options:
+	#   ns: namespaces to search in, as pipe-separated numbers (or single number). Default: 0 (main).
+	def list_search_titles key, opts={}
+		opts = {ns: 0}.merge opts
+		r = @sunflower.API_continued('action=query&list=search&srwhat=title&srlimit=max&srnamespace='+CGI.escape(opts[:ns].to_s)+'&srsearch='+CGI.escape(key), 'search', 'srcontinue')
+		r['query']['search'].map{|v| v['title']}
+	end
+	
+	# `count` random pages.
+	def list_random count, opts={}
+		r = @sunflower.API_continued('action=query&list=random&rnnamespace=0&rnlimit='+CGI.escape(count.to_s), 'random', 'rncontinue')
+		r['query']['random'].map{|v| v['title']}
+	end
+	
+	# External link search. Format like on Special:LinkSearch.
+	def list_linksearch url, opts={}
+		r = @sunflower.API_continued('action=query&list=exturlusage&eulimit=max&euprop=title&euquery='+CGI.escape(url), 'exturlusage', 'eucontinue')
+		r['query']['exturlusage'].map{|v| v['title']}
+	end
+	
+	# Pages whose titles match given regex. Uses nikola's grep tool: http://toolserver.org/~nikola/grep.php
+	# 
+	# Options:
+	#   ns: namespace to search in, as a number (default: 0, main)
+	#   redirs: whether to include redirects in search results (default: true)
+	def list_grep regex, opts={}
+		opts = {ns: 0, redirs: true}.merge opts
+		lang, wiki = @sunflower.wikiURL.split '.', 2
 		
+		list = []
+		
+		p = RestClient.get("http://toolserver.org/~nikola/grep.php?pattern=#{CGI.escape regex}&lang=#{CGI.escape lang}&wiki=#{CGI.escape wiki}&ns=#{CGI.escape opts[:ns].to_s}#{opts[:redirs] ? '&redirects=on' : ''}")
+		p.scan(/<tr><td><a href="http:\/\/#{@sunflower.wikiURL}\/wiki\/([^#<>\[\]\|\{\}]+?)(?:\?redirect=no|)">/){
+			list << @sunflower.cleanup_title($1)
+		}
 		return list
 	end
 end
 
-if $0==__FILE__
-	puts 'What kind of list do you want to create?'
-	if !(t=ARGV.shift)
-		t=gets
-	else
-		t=t.strip
-		puts t
+class Sunflower
+	# Makes a list of articles. Returns array of titles.
+	def make_list type, key, opts={}
+		begin
+			return Sunflower::List.new self, type, key, opts
+		rescue SunflowerError => e
+			if e.message == "no such list type available: #{type}"
+				backwards_compat = {
+					:categorieson => :categories_on,
+					:categoryrecursive => :category_recursive,
+					:categoryr => :category_recursive,
+					:linkson => :links_on,
+					:templateson => :templates_on,
+					:transclusionson => :templates_on,
+					:usercontribs => :contribs,
+					:whatlinksto => :whatlinkshere,
+					:whattranscludes => :whatembeds,
+					:imageusage => :image_usage,
+					:image => :image_usage,
+					:searchtitles => :search_titles,
+					:external => :linksearch,
+					:regex => :grep,
+					:regexp => :grep,
+				}
+				
+				if type2 = backwards_compat[type.to_s.downcase.gsub(/[^a-z]/, '').to_sym]
+					warn "warning: #{type} has been renamed to #{type2}, old name will be removed in future versions"
+					Sunflower::List.new self, type2, key, opts
+				else
+					raise e
+				end
+			else
+				raise e
+			end
+		end
 	end
-	puts ''
-	
-	puts 'Supply arguments to pass to listmaker:'
-	puts '(press [Enter] without writing anything to finish)'
-	arg=[]
-	ARGV.each do |i|
-		arg<<i.strip
-		puts i.strip
-	end
-	while (a=gets.strip)!=''
-		arg<<a
-	end
-	
-	puts 'Making list, wait patiently...'
-	
-	s=Sunflower.new
-	s.login
-	
-	l=s.make_list(t, *arg)
-	l.sort!
-	f=File.open('list.txt','w')
-	f.write(l.join("\n"))
-	f.close
-	
-	puts 'Done! List saved to "list.txt".'
 end
