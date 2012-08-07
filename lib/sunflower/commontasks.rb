@@ -151,7 +151,7 @@ class Sunflower::Page
 		
 		str.gsub!(/\[\[([^\|\]]+)(\||\]\])/){
 			name, rest = $1, $2
-			"[[#{self.sunflower.cleanup_title name}#{rest}"
+			"[[#{self.sunflower.cleanup_title name, false}#{rest}"
 		}
 		
 		# headings
@@ -163,7 +163,7 @@ class Sunflower::Page
 		
 		if wikiid = self.sunflower.siteinfo['general']['wikiid']
 			if self.respond_to? :"code_cleanup_#{wikiid}"
-				str = self.call :"code_cleanup_#{wikiid}", str
+				str = self.send :"code_cleanup_#{wikiid}", str
 			end
 		end
 		
