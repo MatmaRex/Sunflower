@@ -337,25 +337,26 @@ class Sunflower::Page
 		
 		@title = @sunflower.cleanup_title title
 		
-		if title==''
-			@text=''
-			@orig_text=''
-			return
-		end
+		@preloaded_text = false
+		@preloaded_attrs = false
 		
 		preload_text
 	end
 	
 	# Load the text of this page. Semi-private.
 	def preload_text
-		r = @sunflower.API('action=query&prop=revisions&rvprop=content&titles='+CGI.escape(@title))
-		r = r['query']['pages'].values.first
-		if r['missing']
+		if title == ''
 			@text = ''
-		elsif r['invalid']
-			raise Sunflower::Error, 'title invalid: '+@title
 		else
-			@text = r['revisions'][0]['*']
+			r = @sunflower.API('action=query&prop=revisions&rvprop=content&titles='+CGI.escape(@title))
+			r = r['query']['pages'].values.first
+			if r['missing']
+				@text = ''
+			elsif r['invalid']
+				raise Sunflower::Error, 'title invalid: '+@title
+			else
+				@text = r['revisions'][0]['*']
+			end
 		end
 		
 		@orig_text = @text.dup
