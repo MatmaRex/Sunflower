@@ -432,7 +432,7 @@ class Sunflower::Page
 end
 
 # For backwards compatibility. Deprecated.
-class Page
+class Page # :nodoc:
 	class << self
 		def new *a
 			warn "warning: toplevel Page class has been renamed to Sunflower::Page, this alias will be removed in future versions"
@@ -446,7 +446,7 @@ end
 # For backwards compatibility. Deprecated.
 # 
 # We use inheritance shenanigans to keep the usage in "begin ... rescue ... end" working.
-class SunflowerError < StandardError
+class SunflowerError < StandardError # :nodoc:
 	%w[== backtrace exception inspect message set_backtrace to_s].each do |meth|
 		define_method meth.to_sym do |*a, &b|
 			if self.class == Sunflower::Error and !@warned
