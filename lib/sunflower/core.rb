@@ -287,7 +287,7 @@ class Sunflower
 end
 
 # Class representing a single Wiki page. To load specified page, use #new. To save it back, use #save.
-class Page
+class Sunflower::Page
 	# Characters which MediaWiki does not permit in page title.
 	INVALID_CHARS = %w(# < > [ ] | { })
 	# Regex matching characters which MediaWiki does not permit in page title.
@@ -425,10 +425,22 @@ class Page
 	alias :put :save
 	
 	def self.get title, wiki=''
-		Page.new(title, wiki)
+		self.new(title, wiki)
 	end
 	
 	def self.load title, wiki=''
-		Page.new(title, wiki)
+		self.new(title, wiki)
+	end
+end
+
+# For backwards compatibility. Deprecated.
+class Page
+	class << self
+		def new *a
+			warn "warning: toplevel Page class has been renamed to Sunflower::Page, this alias will be removed in future versions"
+			Sunflower::Page.new *a
+		end
+		alias get new
+		alias load new
 	end
 end

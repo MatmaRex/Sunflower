@@ -1,7 +1,7 @@
 # coding: utf-8
 # extends Page with some methods letting easily perform common tasks
 
-class Page
+class Sunflower::Page
 	# executes methods on self
 	# "commands" is array of arrays
 	# page.execute([
