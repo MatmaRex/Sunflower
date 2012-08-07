@@ -1,12 +1,11 @@
+# coding: utf-8
 # This is the most basic bot possible.
 
-require 'sunflower-commontasks.rb'
+require 'sunflower'
 
-s=Sunflower.new
-s.login
+s = Sunflower.new.login
+s.summary = 'test summary'
 
-$summary='Sunflower: test'
-
-p=Page.get('Test')
-p.write p.text+"\n\ntest"
+p = Sunflower::Page.new 'Test'
+p.text += "\n\ntest"
 p.save
