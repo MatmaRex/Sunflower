@@ -228,7 +228,7 @@ class Sunflower
 	end
 	
 	# Cleans up underscores, percent-encoding and title-casing in title (with optional anchor).
-	def cleanup_title title
+	def cleanup_title title, uppercase=true
 		name, anchor = title.split '#', 2
 		
 		# CGI.unescape also changes pluses to spaces; code borrowed from there
@@ -247,7 +247,7 @@ class Sunflower
 			end
 		end
 		
-		name[0] = name[0].upcase if @siteinfo["general"]["case"] == "first-letter"
+		name[0] = name[0].upcase if uppercase and @siteinfo["general"]["case"] == "first-letter"
 		
 		return [ns ? "#{ns}:" : nil,  name,  anchor ? "##{anchor}" : nil].join ''
 	end
