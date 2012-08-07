@@ -30,17 +30,17 @@ class Sunflower::List < Array
 	
 private
 	# Can be used to create a new list from array. Used internally in .from_ary.
-	def list_pages ary, opts={}
+	def list_pages ary, opts={} # :doc:
 		ary
 	end
 	
 	# Create from plaintext list, each title in separate line.
-	def list_plaintext text, opts={}
+	def list_plaintext text, opts={} # :doc:
 		text.split(/\r?\n/)
 	end
 	
 	# Create from file. Supports BOM in UTF-8 files.
-	def list_file filename, opts={}
+	def list_file filename, opts={} # :doc:
 		lines = File.readlines(filename)
 		lines[0].sub!(/^\357\273\277/, '') # BOM
 		lines.each{|ln| ln.chomp! }
@@ -49,19 +49,19 @@ private
 	end
 	
 	# Categories on given page.
-	def list_categories_on page, opts={}
+	def list_categories_on page, opts={} # :doc:
 		r = @sunflower.API_continued('action=query&prop=categories&cllimit=max&titles='+CGI.escape(page), 'pages', 'clcontinue')
 		r['query']['pages'].values.first['categories'].map{|v| v['title']}
 	end
 	
 	# Category members.
-	def list_category cat, opts={}
+	def list_category cat, opts={} # :doc:
 		r = @sunflower.API_continued('action=query&list=categorymembers&cmprop=title&cmlimit=max&cmtitle='+CGI.escape(cat), 'categorymembers', 'cmcontinue')
 		r['query']['categorymembers'].map{|v| v['title']}
 	end
 	
 	# Category members. Scans categories recursively.
-	def list_category_recursive cat, opts={}
+	def list_category_recursive cat, opts={} # :doc:
 		list = [] # list of articles
 		processed = []
 		cats_to_process = [cat] # list of categories to be processes
@@ -83,37 +83,37 @@ private
 	end
 	
 	# Links on given page.
-	def list_links_on page, opts={}
+	def list_links_on page, opts={} # :doc:
 		r = @sunflower.API_continued('action=query&prop=links&pllimit=max&titles='+CGI.escape(page), 'pages', 'plcontinue')
 		r['query']['pages'].values.first['links'].map{|v| v['title']}
 	end
 	
 	# Templates used on given page.
-	def list_templates_on page, opts={}
+	def list_templates_on page, opts={} # :doc:
 		r = @sunflower.API_continued('action=query&prop=templates&tllimit=max&titles='+CGI.escape(page), 'pages', 'tlcontinue')
 		r['query']['pages'].values.first['templates'].map{|v| v['title']}
 	end
 	
 	# Pages edited by given user.
-	def list_contribs user, opts={}
+	def list_contribs user, opts={} # :doc:
 		r = @sunflower.API_continued('action=query&list=usercontribs&uclimit=max&ucprop=title&ucuser='+CGI.escape(user), 'usercontribs', 'uccontinue')
 		r['query']['usercontribs'].map{|v| v['title']}
 	end
 	
 	# Pages which link to given page.
-	def list_whatlinkshere page, opts={}
+	def list_whatlinkshere page, opts={} # :doc:
 		r = @sunflower.API_continued('action=query&list=backlinks&bllimit=max&bltitle='+CGI.escape(page), 'backlinks', 'blcontinue')
 		r['query']['backlinks'].map{|v| v['title']}
 	end
 	
 	# Pages which embed (transclude) given page.
-	def list_whatembeds page, opts={}
+	def list_whatembeds page, opts={} # :doc:
 		r = @sunflower.API_continued('action=query&list=embeddedin&eilimit=max&eititle='+CGI.escape(page), 'embeddedin', 'eicontinue')
 		r['query']['embeddedin'].map{|v| v['title']}
 	end
 	
 	# Pages which used given image.
-	def list_image_usage image, opts={}
+	def list_image_usage image, opts={} # :doc:
 		r = @sunflower.API_continued('action=query&list=imageusage&iulimit=max&iutitle='+CGI.escape(image), 'imageusage', 'iucontinue')
 		r['query']['imageusage'].map{|v| v['title']}
 	end
@@ -121,8 +121,8 @@ private
 	# Search results for given text.
 	# 
 	# Options:
-	#   ns: namespaces to search in, as pipe-separated numbers (or single number). Default: 0 (main).
-	def list_search text, opts={}
+	# * ns: namespaces to search in, as pipe-separated numbers (or single number). Default: 0 (main).
+	def list_search text, opts={} # :doc:
 		opts = {ns: 0}.merge opts
 		r = @sunflower.API_continued('action=query&list=search&srwhat=text&srlimit=max&srnamespace='+CGI.escape(opts[:ns].to_s)+'&srsearch='+CGI.escape(text), 'search', 'srcontinue')
 		r['query']['search'].map{|v| v['title']}
@@ -131,21 +131,21 @@ private
 	# Search results for given text. Only searches in page titles. See also #list_grep.
 	# 
 	# Options:
-	#   ns: namespaces to search in, as pipe-separated numbers (or single number). Default: 0 (main).
-	def list_search_titles key, opts={}
+	# * ns: namespaces to search in, as pipe-separated numbers (or single number). Default: 0 (main).
+	def list_search_titles key, opts={} # :doc:
 		opts = {ns: 0}.merge opts
 		r = @sunflower.API_continued('action=query&list=search&srwhat=title&srlimit=max&srnamespace='+CGI.escape(opts[:ns].to_s)+'&srsearch='+CGI.escape(key), 'search', 'srcontinue')
 		r['query']['search'].map{|v| v['title']}
 	end
 	
 	# `count` random pages.
-	def list_random count, opts={}
+	def list_random count, opts={} # :doc:
 		r = @sunflower.API_continued('action=query&list=random&rnnamespace=0&rnlimit='+CGI.escape(count.to_s), 'random', 'rncontinue')
 		r['query']['random'].map{|v| v['title']}
 	end
 	
 	# External link search. Format like on Special:LinkSearch.
-	def list_linksearch url, opts={}
+	def list_linksearch url, opts={} # :doc:
 		r = @sunflower.API_continued('action=query&list=exturlusage&eulimit=max&euprop=title&euquery='+CGI.escape(url), 'exturlusage', 'eucontinue')
 		r['query']['exturlusage'].map{|v| v['title']}
 	end
@@ -153,9 +153,9 @@ private
 	# Pages whose titles match given regex. Uses nikola's grep tool: http://toolserver.org/~nikola/grep.php
 	# 
 	# Options:
-	#   ns: namespace to search in, as a number (default: 0, main)
-	#   redirs: whether to include redirects in search results (default: true)
-	def list_grep regex, opts={}
+	# * ns: namespace to search in, as a number (default: 0, main)
+	# * redirs: whether to include redirects in search results (default: true)
+	def list_grep regex, opts={} # :doc:
 		opts = {ns: 0, redirs: true}.merge opts
 		lang, wiki = @sunflower.wikiURL.split '.', 2
 		

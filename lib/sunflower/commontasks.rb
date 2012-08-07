@@ -1,5 +1,4 @@
 # coding: utf-8
-# extends Page with some methods letting easily perform common tasks
 
 class Sunflower::Page
 	# executes methods on self

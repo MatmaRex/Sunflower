@@ -97,6 +97,7 @@ class Sunflower
 			@namespace_to_id[ h['*'].downcase ] = h['id'].to_i
 		end
 	end
+	private :_build_ns_map
 	
 	# Call the API. Returns a hash of JSON response. Request can be a HTTP request string or a hash.
 	def API request
@@ -299,14 +300,14 @@ class Sunflower::Page
 	# The Sunflower instance this page belongs to.
 	attr_reader :sunflower
 	
-	# this is only for RDoc. wrapped in "if false" to avoid warnings when running with ruby -w
-	if false
+	# this is only for RDoc.
+	
 	# Return value of given attribute, as returned by API call prop=info for this page. Lazy-loaded.
 	attr_reader :pageid, :ns, :title, :touched, :lastrevid, :counter, :length, :starttimestamp, :edittoken, :protection
-	end
 	
 	# calling any of these accessors will fetch the data.
 	[:pageid, :ns, :title, :touched, :lastrevid, :counter, :length, :starttimestamp, :edittoken, :protection].each do |meth|
+		remove_method meth # to avoid warnings when running with ruby -w
 		define_method meth do
 			preload_attrs unless @preloaded_attrs
 			instance_variable_get "@#{meth}"
