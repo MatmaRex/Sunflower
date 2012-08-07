@@ -3,8 +3,6 @@ require 'rest-client'
 require 'json'
 require 'cgi'
 
-class SunflowerError < StandardError; end
-
 # Main class. To start working, you have to create new Sunflower:
 #   s = Sunflower.new('en.wikipedia.org')
 # And then log in:
@@ -62,7 +60,7 @@ class Sunflower
 			if !@userdata.empty?
 				url=@userdata[0]
 			else
-				raise SunflowerError, 'initialize: no URL supplied and no userdata found!'
+				raise Sunflower::Error, 'initialize: no URL supplied and no userdata found!'
 			end
 		end
 		
@@ -165,11 +163,11 @@ class Sunflower
 				user=@userdata[1] if user==''
 				password=@userdata[2] if password==''
 			else
-				raise SunflowerError, 'login: no user/pass supplied and no userdata found!'
+				raise Sunflower::Error, 'login: no user/pass supplied and no userdata found!'
 			end
 		end
 		
-		raise SunflowerError, 'bad username!' if user =~ INVALID_CHARS_REGEX
+		raise Sunflower::Error, 'bad username!' if user =~ INVALID_CHARS_REGEX
 		
 		
 		# 1. get the login token
@@ -200,7 +198,7 @@ class Sunflower
 		})
 		
 		
-		raise SunflowerError, 'unable to log in (no cookies received)!' if !@cookies
+		raise Sunflower::Error, 'unable to log in (no cookies received)!' if !@cookies
 		
 		
 		# 3. confirm you did log in by checking the watchlist.
@@ -208,7 +206,7 @@ class Sunflower
 		r=self.API('action=query&list=watchlistraw')
 		if r['error'] && r['error']['code']=='wrnotloggedin'
 			@loggedin=false
-			raise SunflowerError, 'unable to log in!'
+			raise Sunflower::Error, 'unable to log in!'
 		end
 		
 		# 4. check bot rights
@@ -319,7 +317,7 @@ class Sunflower::Page
 	#
 	# If you are using multiple Sunflowers, you have to specify which wiki this page belongs to using the second argument of function; you can pass whole URL (same as when creating new Sunflower) or just the language code.
 	def initialize title='', wiki=''
-		raise SunflowerError, 'title invalid: '+title if title =~ INVALID_CHARS_REGEX
+		raise Sunflower::Error, 'title invalid: '+title if title =~ INVALID_CHARS_REGEX
 		
 		@modulesExecd=[] #used by sunflower-commontasks.rb
 		@summaryAppend=[] #used by sunflower-commontasks.rb
@@ -328,13 +326,13 @@ class Sunflower::Page
 		
 		if wiki=='' 
 			count=ObjectSpace.each_object(Sunflower){|o| @sunflower=o}
-			raise SunflowerError, 'no Sunflowers present' if count==0
-			raise SunflowerError, 'you must pass wiki name if using multiple Sunflowers at once' if count>1
+			raise Sunflower::Error, 'no Sunflowers present' if count==0
+			raise Sunflower::Error, 'you must pass wiki name if using multiple Sunflowers at once' if count>1
 		else
 			ObjectSpace.each_object(Sunflower){|o| @sunflower=o if o.wikiURL==wiki}
 		end
 		
-		raise SunflowerError, "no Sunflower for #{wiki}" if !@sunflower
+		raise Sunflower::Error, "no Sunflower for #{wiki}" if !@sunflower
 		
 		@title = @sunflower.cleanup_title title
 		
@@ -354,7 +352,7 @@ class Sunflower::Page
 		if r['missing']
 			@text = ''
 		elsif r['invalid']
-			raise SunflowerError, 'title invalid: '+@title
+			raise Sunflower::Error, 'title invalid: '+@title
 		else
 			@text = r['revisions'][0]['*']
 		end
@@ -401,8 +399,8 @@ class Sunflower::Page
 		
 		summary = @sunflower.summary if !summary
 		
-		raise SunflowerError, 'title invalid: '+title if title =~ INVALID_CHARS_REGEX
-		raise SunflowerError, 'no summary!' if (!summary or summary=='') && @summaryAppend.empty?
+		raise Sunflower::Error, 'title invalid: '+title if title =~ INVALID_CHARS_REGEX
+		raise Sunflower::Error, 'no summary!' if (!summary or summary=='') && @summaryAppend.empty?
 		
 		unless @summaryAppend.empty?
 			if !summary or summary==''
@@ -444,3 +442,34 @@ class Page
 		alias load new
 	end
 end
+
+# For backwards compatibility. Deprecated.
+# 
+# We use inheritance shenanigans to keep the usage in "begin ... rescue ... end" working.
+class SunflowerError < StandardError
+	%w[== backtrace exception inspect message set_backtrace to_s].each do |meth|
+		define_method meth.to_sym do |*a, &b|
+			if self.class == Sunflower::Error and !@warned
+				warn "warning: toplevel SunflowerError class has been renamed to Sunflower::Error, this alias will be removed in future versions"
+				@warned = true
+			end
+			
+			super *a, &b
+		end
+	end
+	
+	class << self
+		def new *a
+			warn "warning: toplevel SunflowerError class has been renamed to Sunflower::Error, this alias will be removed in future versions" unless self == Sunflower::Error
+			super
+		end
+		def exception *a
+			warn "warning: toplevel SunflowerError class has been renamed to Sunflower::Error, this alias will be removed in future versions" unless self == Sunflower::Error
+			super
+		end
+	end
+end
+
+
+# Represents an error raised by Sunflower.
+class Sunflower::Error < SunflowerError; end

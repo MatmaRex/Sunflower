@@ -17,7 +17,7 @@ class Sunflower::List < Array
 		if self.respond_to? meth, true
 			super(self.send meth, key, opts)
 		else
-			raise SunflowerError, "no such list type available: #{type}"
+			raise Sunflower::Error, "no such list type available: #{type}"
 		end
 	end
 	
@@ -174,7 +174,7 @@ class Sunflower
 	def make_list type, key, opts={}
 		begin
 			return Sunflower::List.new self, type, key, opts
-		rescue SunflowerError => e
+		rescue Sunflower::Error => e
 			if e.message == "no such list type available: #{type}"
 				backwards_compat = {
 					:categorieson => :categories_on,
