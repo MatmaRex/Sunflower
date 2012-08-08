@@ -350,12 +350,19 @@ class Sunflower::Page
 	# The text of the page, as of when it was loaded. Lazy-loaded.
 	attr_reader :orig_text
 	
-	# Return value of given attribute, as returned by API call prop=info for this page. Lazy-loaded.
-	attr_reader :pageid, :ns, :title, :touched, :lastrevid, :counter, :length, :starttimestamp, :edittoken, :protection
+	# Page title, as passed to #initialize and cleaned by Sunflower#cleanup_title.
+	# Real page title as canonicalized by MediaWiki software can be accessed via #real_title
+	# (but it should always be the same).
+	attr_reader :title
+	
+	# Value of given attribute, as returned by API call prop=info for this page. Lazy-loaded.
+	attr_reader :pageid, :ns, :touched, :lastrevid, :counter, :length, :starttimestamp, :edittoken, :protection
+	# Value of `title` attribute, as returned by API call prop=info for this page. Lazy-loaded. See #title.
+	attr_reader :real_title
 	
 	# calling any of these accessors will fetch the data.
 	# getters...
-	[:pageid, :ns, :title, :touched, :lastrevid, :counter, :length, :starttimestamp, :edittoken, :protection].each do |meth|
+	[:pageid, :ns, :real_title, :touched, :lastrevid, :counter, :length, :starttimestamp, :edittoken, :protection].each do |meth|
 		remove_method meth # to avoid warnings when running with ruby -w
 		define_method meth do
 			preload_attrs unless @preloaded_attrs
@@ -434,6 +441,7 @@ class Sunflower::Page
 		r = @sunflower.API('action=query&prop=info&inprop=protection&intoken=edit&titles='+CGI.escape(@title))
 		r = r['query']['pages'].values.first
 		r.each{|key, value|
+			key = 'real_title' if key == 'title'
 			self.instance_variable_set('@'+key, value)
 		}
 		
