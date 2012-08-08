@@ -4,12 +4,14 @@
 class Sunflower::List < Array
 	# Create a new article list and fill it with items.
 	# 
-	# Sunflower may be nil; this will, however, make most several methods unavailable.
+	# Sunflower may be nil; this will, however, make most methods unavailable.
 	# 
 	# This is in fact a wrapper for various list generator methods,
 	# each private, named with the format of "list_<type>",
 	# which accept the key and opts arguments and return arrays.
 	# You can use this behavior to create your own ones.
+	# 
+	# You should probably use Sunflower#make_list instead of calling this directly.
 	def initialize sunflower, type, key, opts={}
 		@sunflower = sunflower
 		
