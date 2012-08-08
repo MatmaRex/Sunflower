@@ -242,7 +242,7 @@ class Sunflower
 				}
 				
 				if type2 = backwards_compat[type.to_s.downcase.gsub(/[^a-z]/, '').to_sym]
-					warn "warning: #{type} has been renamed to #{type2}, old name will be removed in future versions"
+					warn "warning: #{type} has been renamed to #{type2}, old name will be removed in v0.6"
 					Sunflower::List.new self, type2, key, opts
 				else
 					raise e

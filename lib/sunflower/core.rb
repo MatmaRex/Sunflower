@@ -539,7 +539,7 @@ end
 class Page # :nodoc:
 	class << self
 		def new *a
-			warn "warning: toplevel Page class has been renamed to Sunflower::Page, this alias will be removed in future versions"
+			warn "warning: toplevel Page class has been renamed to Sunflower::Page, this alias will be removed in v0.6"
 			Sunflower::Page.new *a
 		end
 		alias get new
@@ -554,7 +554,7 @@ class SunflowerError < StandardError # :nodoc:
 	%w[== backtrace exception inspect message set_backtrace to_s].each do |meth|
 		define_method meth.to_sym do |*a, &b|
 			if self.class == Sunflower::Error and !@warned
-				warn "warning: toplevel SunflowerError class has been renamed to Sunflower::Error, this alias will be removed in future versions"
+				warn "warning: toplevel SunflowerError class has been renamed to Sunflower::Error, this alias will be removed in v0.6"
 				@warned = true
 			end
 			
@@ -564,11 +564,11 @@ class SunflowerError < StandardError # :nodoc:
 	
 	class << self
 		def new *a
-			warn "warning: toplevel SunflowerError class has been renamed to Sunflower::Error, this alias will be removed in future versions" unless self == Sunflower::Error
+			warn "warning: toplevel SunflowerError class has been renamed to Sunflower::Error, this alias will be removed in v0.6" unless self == Sunflower::Error
 			super
 		end
 		def exception *a
-			warn "warning: toplevel SunflowerError class has been renamed to Sunflower::Error, this alias will be removed in future versions" unless self == Sunflower::Error
+			warn "warning: toplevel SunflowerError class has been renamed to Sunflower::Error, this alias will be removed in v0.6" unless self == Sunflower::Error
 			super
 		end
 	end
