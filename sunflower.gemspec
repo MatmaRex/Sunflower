@@ -21,25 +21,16 @@ Gem::Specification.new do |s|
 		LICENSE
 		bin/sunflower-setup
 		example-bot.rb
-		use-easy-bot.rb
 		lib/sunflower.rb
 		lib/sunflower/core.rb
 		lib/sunflower/commontasks.rb
 		lib/sunflower/list.rb
 		scripts/fix-bold-in-headers.rb
-		scripts/fix-multiple-same-refs.rb
 		scripts/fix-langs.rb
 		scripts/lekkoatl-portal.rb
-		scripts/ZDBOT.rb
-		scripts/aktualizacjapilkarzy.rb
-		scripts/changeimage.rb
-		scripts/insight.rb
-		scripts/make-id2team-list.rb
-		scripts/author-list.rb
 		scripts/fix-unicode-control-chars.rb
 		scripts/fix-double-pipes.rb
 		scripts/fix-some-entities.rb
 		scripts/recat.rb
-		scripts/wanted.rb
 	]
 end
