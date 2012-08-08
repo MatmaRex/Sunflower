@@ -78,7 +78,7 @@ class Sunflower::Page
 		
 		str.gsub!(/\[\[([^\|\]]+)(\||\]\])/){
 			name, rest = $1, $2
-			"[[#{self.sunflower.cleanup_title name, false}#{rest}"
+			"[[#{self.sunflower.cleanup_title name, true, true}#{rest}"
 		}
 		
 		# headings

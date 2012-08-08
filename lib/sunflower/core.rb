@@ -272,7 +272,7 @@ class Sunflower
 	end
 	
 	# Cleans up underscores, percent-encoding and title-casing in title (with optional anchor).
-	def cleanup_title title, uppercase=true
+	def cleanup_title title, preserve_case=false, preserve_colon=false
 		name, anchor = title.split '#', 2
 		
 		# CGI.unescape also changes pluses to spaces; code borrowed from there
@@ -281,6 +281,10 @@ class Sunflower
 		ns = nil
 		name = unescape.call(name).gsub(/[ _]+/, ' ').strip
 		anchor = unescape.call(anchor.gsub(/\.([0-9a-fA-F]{2})/, '%\1')).gsub(/[ _]+/, ' ').strip if anchor
+		
+		leading_colon = name[0]==':'
+		name = name.sub(/^:\s*/, '') if leading_colon
+		leading_colon = false if !preserve_colon
 		
 		# FIXME unicode? downcase, upcase
 		
@@ -291,9 +295,9 @@ class Sunflower
 			end
 		end
 		
-		name[0] = name[0].upcase if uppercase and @siteinfo["general"]["case"] == "first-letter"
+		name[0] = name[0].upcase if !preserve_case and @siteinfo["general"]["case"] == "first-letter"
 		
-		return [ns ? "#{ns}:" : nil,  name,  anchor ? "##{anchor}" : nil].join ''
+		return [leading_colon ? ':' : nil,  ns ? "#{ns}:" : nil,  name,  anchor ? "##{anchor}" : nil].join ''
 	end
 	
 	# Returns the localized namespace name for ns, which may be namespace number, canonical name, or any namespace alias.
