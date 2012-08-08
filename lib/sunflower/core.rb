@@ -26,7 +26,19 @@ class Sunflower
 	def self.path
 		File.join(ENV['HOME'], 'sunflower-userdata')
 	end
-
+	
+	# Returns array of [url, username, password], or nil if userdata is unavailable or invalid.
+	def self.read_userdata
+		data = nil
+		data = File.read(Sunflower.path).split(/\r?\n/).map{|i| i.strip} rescue nil
+		
+		if data && data.length==3 && data.all?{|a| a and a != ''}
+			return data
+		else
+			return nil
+		end
+	end
+	
 	# Summary used when saving edits with this Sunflower.
 	attr_accessor :summary
 	# Whether to run #code_cleanup when calling #save.
@@ -93,16 +105,11 @@ class Sunflower
 	
 	# Initialize a new Sunflower working on a wiki with given URL, for ex. "pl.wikipedia.org". url can also be a shorthand identifier such as "b:pl" - see Sunflower.resolve_wikimedia_id for details.
 	def initialize url=nil
-		begin
-			r=File.read(Sunflower.path)
-			@userdata=r.split(/\r?\n/).map{|i| i.strip}
-		rescue
-			@userdata=[]
-		end
-		
 		if !url
-			if !@userdata.empty?
-				url=@userdata[0]
+			userdata = Sunflower.read_userdata()
+			
+			if userdata
+				url = userdata[0]
 			else
 				raise Sunflower::Error, 'initialize: no URL supplied and no userdata found!'
 			end
@@ -207,9 +214,11 @@ class Sunflower
 	# Log in using given info.
 	def login user='', password=''
 		if user=='' || password==''
-			if !@userdata.empty?
-				user=@userdata[1] if user==''
-				password=@userdata[2] if password==''
+			userdata = Sunflower.read_userdata()
+			
+			if userdata
+				user = userdata[1] if user==''
+				password = userdata[2] if password==''
 			else
 				raise Sunflower::Error, 'login: no user/pass supplied and no userdata found!'
 			end
