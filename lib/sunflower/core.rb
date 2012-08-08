@@ -47,6 +47,50 @@ class Sunflower
 	attr_writer :log
 	def log?; @log; end
 	
+	# Used by #initialize to convert short identifiers such as "b:pl" to domains such as "pl.wikibooks.org".
+	# Identifier is of the format "type:lang" or "lang:type" (see below for valid values).
+	# 
+	# Either or both parts can be ommitted; default type is "w", default lang is "en". 
+	# (Since clashes are impossible, the colon can be ommitted in such cases as well.)
+	# 
+	# lang can be any valid language code. It is ignored for type == "meta" or "commons".
+	# 
+	# Valid values for type are the same as used for inter-wiki links, that is:
+	# [w] Wikipedia
+	# [b] Wikibooks
+	# [n] Wikinews
+	# [q] Wikiquote
+	# [s] Wikisource
+	# [v] Wikiversity
+	# [wikt] Wiktionary
+	# [species] Wikispecies
+	# [commons] Wikimedia Commons
+	# [meta] Wikimedia Meta-Wiki 
+	def self.resolve_wikimedia_id id
+		keys = id.split(':').select{|a| a and !a.empty? }
+		
+		raise ArgumentError, 'invalid format' if keys.length > 2
+		
+		type_map = {
+			'b' => 'XX.wikibooks.org',
+			'q' => 'XX.wikiquote.org',
+			'n' => 'XX.wikinews.org',
+			'w' => 'XX.wikipedia.org',
+			'wikt' => 'XX.wiktionary.org',
+			'species' => 'XX.wikispecies.org',
+			'v' => 'XX.wikiversity.org',
+			's' => 'XX.wikisource.org',
+			'commons' => 'commons.wikimedia.org',
+			'meta' => 'meta.wikimedia.org',
+		}
+		
+		types, langs = keys.partition{|a| type_map.keys.include? a }
+		type = types.first || 'w'
+		lang = langs.first || 'en'
+		
+		return type_map[type].sub 'XX', lang
+	end
+	
 	# Initialize a new Sunflower working on a wiki with given URL, for ex. "pl.wikipedia.org".
 	def initialize url=nil
 		begin
