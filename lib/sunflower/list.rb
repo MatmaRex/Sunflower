@@ -29,6 +29,51 @@ class Sunflower::List < Array
 	end
 	
 	
+	# Converts self to an array of Sunflower::Page objects.
+	# 
+	# Use #pages_preloaded to preload the text of all pages at once, instead of via separate requests.
+	def pages
+		Array.new self.map{|t| Sunflower::Page.new t, @sunflower }
+	end
+	
+	# Converts self to an array of Sunflower::Page objects,
+	# then preloads the text in all of them using as little requests as possible.
+	# (API limit is at most 500 pages/req for bots, 50 for other users.)
+	# 
+	# If any title is invalid, Sunflower::Error will be raised.
+	# 
+	# If any title is uncanonicalizable by Sunflower#cleanup_title,
+	# it will not blow up or return incorrect results; however, text of some other
+	# pages may be missing (it will be lazy-loaded when requested, as usual).
+	def pages_preloaded
+		pgs = self.pages
+		at_once = @sunflower.is_bot? ? 500 : 50
+		
+		# this is different from self; page titles are guaranteed to be canonicalized
+		titles = pgs.map{|a| a.title }
+		
+		titles.each_slice(at_once).with_index do |slice, slice_no|
+			res = @sunflower.API('action=query&prop=revisions&rvprop=content&titles='+CGI.escape(slice.join '|'))
+			res['query']['pages'].values.each_with_index do |h, i|
+				page = pgs[slice_no*at_once + i]
+				
+				if h['title'] and h['title'] == page.title
+					if h['missing']
+						page.text = ''
+					elsif h['invalid']
+						raise Sunflower::Error, 'title invalid: '+page.title
+					else
+						page.text = h['revisions'][0]['*']
+					end
+					
+					page.preloaded_text = true
+				end
+			end
+		end
+		
+		return pgs
+	end
+	
 	
 private
 	# Can be used to create a new list from array. Used internally in .from_ary.
