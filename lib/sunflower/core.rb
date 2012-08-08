@@ -360,6 +360,10 @@ class Sunflower::Page
 	# Value of `title` attribute, as returned by API call prop=info for this page. Lazy-loaded. See #title.
 	attr_reader :real_title
 	
+	# Whether this datum is already loaded. Can be set to true to suppress loading
+	# (used e.g. by Sunflower::List#pages_preloaded)
+	attr_accessor :preloaded_text, :preloaded_attrs
+	
 	# calling any of these accessors will fetch the data.
 	# getters...
 	[:pageid, :ns, :real_title, :touched, :lastrevid, :counter, :length, :starttimestamp, :edittoken, :protection].each do |meth|
