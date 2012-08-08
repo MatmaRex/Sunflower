@@ -342,25 +342,39 @@ class Sunflower::Page
 	# Regex matching characters which MediaWiki does not permit in page title.
 	INVALID_CHARS_REGEX = Regexp.union *INVALID_CHARS
 	
-	# The current text of the page.
-	attr_accessor :text
-	# The text of the page, as of when it was loaded.
-	attr_reader :orig_text
-	
 	# The Sunflower instance this page belongs to.
 	attr_reader :sunflower
 	
-	# this is only for RDoc.
+	# The current text of the page. Lazy-loaded.
+	attr_accessor :text
+	# The text of the page, as of when it was loaded. Lazy-loaded.
+	attr_reader :orig_text
 	
 	# Return value of given attribute, as returned by API call prop=info for this page. Lazy-loaded.
 	attr_reader :pageid, :ns, :title, :touched, :lastrevid, :counter, :length, :starttimestamp, :edittoken, :protection
 	
 	# calling any of these accessors will fetch the data.
+	# getters...
 	[:pageid, :ns, :title, :touched, :lastrevid, :counter, :length, :starttimestamp, :edittoken, :protection].each do |meth|
 		remove_method meth # to avoid warnings when running with ruby -w
 		define_method meth do
 			preload_attrs unless @preloaded_attrs
 			instance_variable_get "@#{meth}"
+		end
+	end
+	[:text, :orig_text].each do |meth|
+		remove_method meth # to avoid warnings when running with ruby -w
+		define_method meth do
+			preload_text unless @preloaded_text
+			instance_variable_get "@#{meth}"
+		end
+	end
+	# setters...
+	[:text=].each do |meth|
+		remove_method meth # to avoid warnings when running with ruby -w
+		define_method meth do |a|
+			preload_text unless @preloaded_text
+			instance_variable_set "@#{meth.to_s.chop}", a
 		end
 	end
 	
@@ -392,8 +406,6 @@ class Sunflower::Page
 		
 		@preloaded_text = false
 		@preloaded_attrs = false
-		
-		preload_text
 	end
 	
 	# Load the text of this page. Semi-private.
