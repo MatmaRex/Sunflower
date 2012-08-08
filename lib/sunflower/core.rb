@@ -91,7 +91,7 @@ class Sunflower
 		return type_map[type].sub 'XX', lang
 	end
 	
-	# Initialize a new Sunflower working on a wiki with given URL, for ex. "pl.wikipedia.org".
+	# Initialize a new Sunflower working on a wiki with given URL, for ex. "pl.wikipedia.org". url can also be a shorthand identifier such as "b:pl" - see Sunflower.resolve_wikimedia_id for details.
 	def initialize url=nil
 		begin
 			r=File.read(Sunflower.path)
@@ -111,7 +111,7 @@ class Sunflower
 		@warnings=true
 		@log=false
 		
-		@wikiURL=url
+		@wikiURL = (url.include?('.') ? url : Sunflower.resolve_wikimedia_id(url))
 		
 		@loggedin=false
 		
@@ -358,26 +358,29 @@ class Sunflower::Page
 		end
 	end
 	
-	# Load the specified page. Only the text will be immediately loaded - attributes and edit token will be loaded when needed, or when you call #preload_attrs.
-	#
-	# If you are using multiple Sunflowers, you have to specify which wiki this page belongs to using the second argument of function; you can pass whole URL (same as when creating new Sunflower) or just the language code.
-	def initialize title='', wiki=''
+	# Load the specified page. 
+	# Only the text will be immediately loaded - attributes and edit token will be loaded when needed, or when you call #preload_attrs.
+	# 
+	# If you are using multiple Sunflowers, you have to specify which one this page belongs to using the second argument of function.
+	# You can pass either a Sunflower object, wiki URL, or a shorthand id as specified in Sunflower.resolve_wikimedia_id.
+	def initialize title='', url=''
 		raise Sunflower::Error, 'title invalid: '+title if title =~ INVALID_CHARS_REGEX
 		
 		@modulesExecd=[] #used by sunflower-commontasks.rb
 		@summaryAppend=[] #used by sunflower-commontasks.rb
 		
-		wiki = wiki+'.wikipedia.org' if wiki.index('.')==nil && wiki!=''
-		
-		if wiki=='' 
-			count=ObjectSpace.each_object(Sunflower){|o| @sunflower=o}
+		case url
+		when Sunflower
+			@sunflower = url
+		when '', nil
+			count = ObjectSpace.each_object(Sunflower){|o| @sunflower=o}
 			raise Sunflower::Error, 'no Sunflowers present' if count==0
 			raise Sunflower::Error, 'you must pass wiki name if using multiple Sunflowers at once' if count>1
 		else
-			ObjectSpace.each_object(Sunflower){|o| @sunflower=o if o.wikiURL==wiki}
+			url = (url.include?('.') ? url : Sunflower.resolve_wikimedia_id(url))
+			ObjectSpace.each_object(Sunflower){|o| @sunflower=o if o.wikiURL==url}
+			raise Sunflower::Error, "no Sunflower for #{url}" if !@sunflower
 		end
-		
-		raise Sunflower::Error, "no Sunflower for #{wiki}" if !@sunflower
 		
 		@title = @sunflower.cleanup_title title
 		
