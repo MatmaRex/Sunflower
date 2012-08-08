@@ -273,6 +273,8 @@ class Sunflower
 	
 	# Cleans up underscores, percent-encoding and title-casing in title (with optional anchor).
 	def cleanup_title title, preserve_case=false, preserve_colon=false
+		return '' if title.strip == ''
+		
 		name, anchor = title.split '#', 2
 		
 		# CGI.unescape also changes pluses to spaces; code borrowed from there
