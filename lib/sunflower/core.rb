@@ -121,6 +121,7 @@ class Sunflower
 		@log = false
 		
 		@loggedin = false
+		@username = nil
 		@is_bot = false
 		
 		@cookies = {}
@@ -129,6 +130,10 @@ class Sunflower
 		@siteinfo = self.API(action: 'query', meta: 'siteinfo', siprop: siprop)['query']
 		
 		_build_ns_map
+	end
+	
+	def inspect
+		"#<Sunflower #{@loggedin ? @username : "[anon]"}@#{@wikiURL}#{@is_bot ? ' [bot]' : ''}>"
 	end
 	
 	# Private. Massages data from siteinfo to be used for recognizing namespaces.
@@ -265,6 +270,9 @@ class Sunflower
 			@loggedin=false
 			raise Sunflower::Error, 'unable to log in!'
 		end
+		
+		# set the username
+		@username = user
 		
 		# 4. check bot rights
 		r=self.API('action=query&list=allusers&aulimit=1&augroup=bot&aufrom='+(CGI.escape user))
