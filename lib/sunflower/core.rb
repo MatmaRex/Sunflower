@@ -48,6 +48,11 @@ class Sunflower
 	# Siteinfo, as returned by API call.
 	attr_accessor :siteinfo
 	
+	# Whether we are logged in.
+	def logged_in?; @loggedin; end
+	# Username if logged in; nil otherwise.
+	attr_reader :username
+	
 	# Whether this user (if logged in) has bot rights.
 	def is_bot?; @is_bot; end
 	
