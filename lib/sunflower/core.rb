@@ -108,12 +108,15 @@ class Sunflower
 			end
 		end
 		
-		@warnings=true
-		@log=false
-		
 		@wikiURL = (url.include?('.') ? url : Sunflower.resolve_wikimedia_id(url))
 		
-		@loggedin=false
+		@warnings = true
+		@log = false
+		
+		@loggedin = false
+		@is_bot = false
+		
+		@cookies = {}
 		
 		siprop = 'general|namespaces|namespacealiases|specialpagealiases|magicwords|interwikimap|dbrepllag|statistics|usergroups|extensions|fileextensions|rightsinfo|languages|skins|extensiontags|functionhooks|showhooks|variables'
 		@siteinfo = self.API(action: 'query', meta: 'siteinfo', siprop: siprop)['query']
@@ -219,7 +222,7 @@ class Sunflower
 		response = RestClient.post(
 			'http://'+@wikiURL+'/w/api.php?'+"action=login&lgname=#{CGI.escape user}&lgpassword=#{CGI.escape password}"+'&format=json', 
 			nil,
-			{:user_agent => 'Sunflower alpha'}
+			{:user_agent => "Sunflower #{VERSION} alpha"}
 		)
 		
 		@cookies = response.cookies
@@ -231,7 +234,7 @@ class Sunflower
 		response = RestClient.post(
 			'http://'+@wikiURL+'/w/api.php?'+"action=login&lgname=#{CGI.escape user}&lgpassword=#{CGI.escape password}&lgtoken=#{token}"+'&format=json',
 			nil,
-			{:user_agent => 'Sunflower alpha', :cookies => @cookies}
+			{:user_agent => "Sunflower #{VERSION} alpha", :cookies => @cookies}
 		)
 		
 		json = JSON.parse response.to_str
