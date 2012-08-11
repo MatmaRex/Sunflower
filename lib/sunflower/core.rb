@@ -422,9 +422,6 @@ class Sunflower::Page
 	def initialize title='', url=''
 		raise Sunflower::Error, 'title invalid: '+title if title =~ INVALID_CHARS_REGEX
 		
-		@modulesExecd=[] #used by sunflower-commontasks.rb
-		@summaryAppend=[] #used by sunflower-commontasks.rb
-		
 		case url
 		when Sunflower
 			@sunflower = url
@@ -498,21 +495,11 @@ class Sunflower::Page
 	# Will call #code_cleanup if Sunflower#always_do_code_cleanup is set.
 	# 
 	# Returns the JSON result of API call or nil when API call was not made.
-	def save title=@title, summary=nil
+	def save title=@title, summary=@sunflower.summary
 		preload_attrs unless @preloaded_attrs
 		
-		summary = @sunflower.summary if !summary
-		
 		raise Sunflower::Error, 'title invalid: '+title if title =~ INVALID_CHARS_REGEX
-		raise Sunflower::Error, 'no summary!' if (!summary or summary=='') && @summaryAppend.empty?
-		
-		unless @summaryAppend.empty?
-			if !summary or summary==''
-				summary = @summaryAppend.uniq.join(', ')
-			else
-				summary = summary.sub(/,\s*\Z/, '') + ', ' + @summaryAppend.uniq.join(', ')
-			end
-		end
+		raise Sunflower::Error, 'empty or no summary!' if !summary or summary==''
 		
 		if @orig_text==@text && title==@title
 			@sunflower.log('Page '+title+' not saved - no changes.')
