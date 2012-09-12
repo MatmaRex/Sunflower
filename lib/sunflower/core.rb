@@ -303,7 +303,7 @@ class Sunflower
 		name, anchor = title.split '#', 2
 		
 		# CGI.unescape also changes pluses to spaces; code borrowed from there
-		unescape = lambda{|a| a.gsub(/((?:%[0-9a-fA-F]{2})+)/){ [$1.delete('%')].pack('H*') } }
+		unescape = lambda{|a| a.gsub(/((?:%[0-9a-fA-F]{2})+)/){ [$1.delete('%')].pack('H*').force_encoding($1.encoding) } }
 		
 		ns = nil
 		name = unescape.call(name).gsub(/[ _]+/, ' ').strip
