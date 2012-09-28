@@ -204,7 +204,7 @@ private
 	# * redirs: whether to include redirects in search results (default: true)
 	def list_grep regex, opts={} # :doc:
 		opts = {ns: 0, redirs: true}.merge opts
-		lang, wiki = @sunflower.wikiURL.split '.', 2
+		lang, wiki, tld = @sunflower.wikiURL.split '.'
 		
 		list = []
 		
