@@ -239,33 +239,29 @@ class Sunflower
 		
 		# 1. get the login token
 		response = RestClient.post(
-			'http://'+@wikiURL+'/w/api.php?'+"action=login&lgname=#{CGI.escape user}&lgpassword=#{CGI.escape password}"+'&format=json', 
-			nil,
+			'http://'+@wikiURL+'/w/api.php', 
+			"action=login&lgname=#{CGI.escape user}&lgpassword=#{CGI.escape password}&format=json",
 			{:user_agent => "Sunflower #{VERSION} alpha"}
 		)
 		
 		@cookies = response.cookies
-		json = JSON.parse response.to_str
-		token, prefix = json['login']['token'], json['login']['cookieprefix']
+		raise Sunflower::Error, 'unable to log in (no cookies received)!' if !@cookies or @cookies.empty?
 		
+		json = JSON.parse response.to_str
+		token, prefix = (json['login']['lgtoken']||json['login']['token']), json['login']['cookieprefix']
 		
 		# 2. actually log in
 		response = RestClient.post(
-			'http://'+@wikiURL+'/w/api.php?'+"action=login&lgname=#{CGI.escape user}&lgpassword=#{CGI.escape password}&lgtoken=#{token}"+'&format=json',
-			nil,
+			'http://'+@wikiURL+'/w/api.php',
+			"action=login&lgname=#{CGI.escape user}&lgpassword=#{CGI.escape password}&lgtoken=#{token}&format=json",
 			{:user_agent => "Sunflower #{VERSION} alpha", :cookies => @cookies}
 		)
 		
 		json = JSON.parse response.to_str
 		
-		@cookies = @cookies.merge(response.cookies).merge({
-			"#{prefix}UserName" => json['login']['lgusername'].to_s,
-			"#{prefix}UserID" => json['login']['lguserid'].to_s,
-			"#{prefix}Token" => json['login']['lgtoken'].to_s
-		})
+		@cookies = @cookies.merge(response.cookies)
 		
-		
-		raise Sunflower::Error, 'unable to log in (no cookies received)!' if !@cookies
+		raise Sunflower::Error, 'unable to log in (no cookies received)!' if !@cookies or @cookies.empty?
 		
 		
 		# 3. confirm you did log in by checking the watchlist.
