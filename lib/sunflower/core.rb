@@ -44,7 +44,7 @@ class Sunflower
 	# Whether to run #code_cleanup when calling #save.
 	attr_accessor :always_do_code_cleanup
 	# The URL this Sunflower works on, as provided as argument to #initialize.
-	attr_reader :wikiURL
+	attr_reader :wikiURL, :api_endpoint
 	# Siteinfo, as returned by API call.
 	attr_accessor :siteinfo
 	
@@ -108,8 +108,16 @@ class Sunflower
 		return type_map[type].sub 'XX', lang
 	end
 	
-	# Initialize a new Sunflower working on a wiki with given URL, for ex. "pl.wikipedia.org". url can also be a shorthand identifier such as "b:pl" - see Sunflower.resolve_wikimedia_id for details.
-	def initialize url=nil
+	# Initialize a new Sunflower working on a wiki with given URL, for ex. "pl.wikipedia.org".
+	# url can also be a shorthand identifier such as "b:pl" - see Sunflower.resolve_wikimedia_id for details.
+	# 
+	# There is currently one option available:
+	# * api_endpoint: full URL to your api.php, if different than http://<url>/w/api.php (standard for WMF wikis)
+	def initialize url=nil, opts={}
+		if url.is_a? Hash
+			url, opts = nil, url
+		end
+		
 		if !url
 			userdata = Sunflower.read_userdata()
 			
@@ -121,6 +129,7 @@ class Sunflower
 		end
 		
 		@wikiURL = (url.include?('.') ? url : Sunflower.resolve_wikimedia_id(url))
+		@api_endpoint = opts[:api_endpoint] || 'http://'+@wikiURL+'/w/api.php'
 		
 		@warnings = true
 		@log = false
@@ -172,7 +181,7 @@ class Sunflower
 		end
 		
 		resp = RestClient.post(
-			'http://'+@wikiURL+'/w/api.php',
+			@api_endpoint,
 			request,
 			{:user_agent => "Sunflower #{VERSION} alpha", :cookies => @cookies}
 		)
@@ -239,7 +248,7 @@ class Sunflower
 		
 		# 1. get the login token
 		response = RestClient.post(
-			'http://'+@wikiURL+'/w/api.php', 
+			@api_endpoint, 
 			"action=login&lgname=#{CGI.escape user}&lgpassword=#{CGI.escape password}&format=json",
 			{:user_agent => "Sunflower #{VERSION} alpha"}
 		)
@@ -252,7 +261,7 @@ class Sunflower
 		
 		# 2. actually log in
 		response = RestClient.post(
-			'http://'+@wikiURL+'/w/api.php',
+			@api_endpoint,
 			"action=login&lgname=#{CGI.escape user}&lgpassword=#{CGI.escape password}&lgtoken=#{token}&format=json",
 			{:user_agent => "Sunflower #{VERSION} alpha", :cookies => @cookies}
 		)
