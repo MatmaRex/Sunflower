@@ -3,6 +3,29 @@ require 'rest-client'
 require 'json'
 require 'cgi'
 
+class Hash
+	# Recursively, destructively merges two hashes that might contain further hashes and arrays.
+	# Hashes are merged using #merge!; arrays are merged using #concat.
+	# 
+	# Named like this to prevent monkey-patching conflicts; is a monkey-patch because it is convenient.
+	# Should be considered private to Sunflower and might disappear at any time.
+	# Used in Sunflower#API_continued.
+	# 
+	# From http://stackoverflow.com/a/2277713 , slightly modified.
+	def sunflower_recursive_merge!(other)
+		other.keys.each do |k|
+			if self[k].is_a?(Array) && other[k].is_a?(Array)
+				self[k].concat(other[k])
+			elsif self[k].is_a?(Hash) && other[k].is_a?(Hash)
+				self[k].recursive_merge!(other[k])
+			else
+				self[k] = other[k]
+			end
+		end
+		self
+	end
+end
+
 # Main class. To start working, you have to create new Sunflower:
 #   s = Sunflower.new('en.wikipedia.org')
 # And then log in:
@@ -193,8 +216,9 @@ class Sunflower
 	# Assumes action=query. 
 	# 
 	# By default returns an array of all API responses. Attempts to merge the responses
-	# into a response that would have been returned if the limit was infinite. merge_on is
-	# the key of response['query'] to merge consecutive responses on.
+	# into a response that would have been returned if the limit was infinite
+	# (merges the response hashes recursively using Hash#sunflower_recursive_merge!).
+	# merge_on is the key of response["query-continue"] that contains the continuation data.
 	# 
 	# If limit given, will perform no more than this many API calls before returning.
 	# If limit is 1, behaves exactly like #API.
@@ -221,10 +245,8 @@ class Sunflower
 		
 		# merge
 		merged = out[0]
-		meth = (merged['query'][merge_on].is_a?(Hash) ? :merge! : :concat)
-		
 		out.drop(1).each do |cur|
-			merged['query'][merge_on].send meth, cur['query'][merge_on]
+			merged.recursive_merge! cur
 		end
 		
 		return merged
