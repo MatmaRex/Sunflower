@@ -40,7 +40,7 @@ end
 #
 # You can use multiple Sunflowers at once, to work on multiple wikis.
 class Sunflower
-	VERSION = '0.5.4'
+	VERSION = '0.5.5'
 	
 	INVALID_CHARS = %w(# < > [ ] | { })
 	INVALID_CHARS_REGEX = Regexp.union *INVALID_CHARS
