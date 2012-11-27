@@ -131,6 +131,9 @@ class Sunflower
 		return type_map[type].sub 'XX', lang
 	end
 	
+	# Used by #initialize to cache siteinfo data.
+	@@siteinfo = {}
+	
 	# Initialize a new Sunflower working on a wiki with given URL, for ex. "pl.wikipedia.org".
 	# url can also be a shorthand identifier such as "b:pl" - see Sunflower.resolve_wikimedia_id for details.
 	# 
@@ -164,7 +167,8 @@ class Sunflower
 		@cookies = {}
 		
 		siprop = 'general|namespaces|namespacealiases|specialpagealiases|magicwords|interwikimap|dbrepllag|statistics|usergroups|extensions|fileextensions|rightsinfo|languages|skins|extensiontags|functionhooks|showhooks|variables'
-		@siteinfo = self.API(action: 'query', meta: 'siteinfo', siprop: siprop)['query']
+		@@siteinfo[@api_endpoint] ||= self.API(action: 'query', meta: 'siteinfo', siprop: siprop)['query']
+		@siteinfo = @@siteinfo[@api_endpoint]
 		
 		_build_ns_map
 	end
