@@ -230,6 +230,11 @@ class Sunflower
 		return merged
 	end
 	
+	# Returns a Sunflower::Page with the given title belonging to this Sunflower.
+	def page title
+		Sunflower::Page.new title, self
+	end
+	
 	# Log in using given info.
 	def login user='', password=''
 		if user=='' || password==''
