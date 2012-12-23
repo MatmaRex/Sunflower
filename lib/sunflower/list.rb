@@ -58,6 +58,8 @@ class Sunflower::List < Array
 				page = pgs[slice_no*at_once + i]
 				
 				if h['title'] and h['title'] == page.title
+					page.preloaded_text = true
+					
 					if h['missing']
 						page.text = ''
 					elsif h['invalid']
@@ -65,8 +67,6 @@ class Sunflower::List < Array
 					else
 						page.text = h['revisions'][0]['*']
 					end
-					
-					page.preloaded_text = true
 				end
 			end
 		end
