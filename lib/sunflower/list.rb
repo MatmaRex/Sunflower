@@ -46,7 +46,7 @@ class Sunflower::List < Array
 	# it will not blow up or return incorrect results; however, text of some other
 	# pages may be missing (it will be lazy-loaded when requested, as usual).
 	def pages_preloaded
-		pgs = self.pages
+		pgs = self.pages.sort_by{|a| a.title}
 		at_once = @sunflower.is_bot? ? 500 : 50
 		
 		# this is different from self; page titles are guaranteed to be canonicalized
@@ -54,7 +54,7 @@ class Sunflower::List < Array
 		
 		titles.each_slice(at_once).with_index do |slice, slice_no|
 			res = @sunflower.API('action=query&prop=revisions&rvprop=content&titles='+CGI.escape(slice.join '|'))
-			res['query']['pages'].values.each_with_index do |h, i|
+			res['query']['pages'].values.sort_by{|h| h['title'] || '' }.each_with_index do |h, i|
 				page = pgs[slice_no*at_once + i]
 				
 				if h['title'] and h['title'] == page.title
