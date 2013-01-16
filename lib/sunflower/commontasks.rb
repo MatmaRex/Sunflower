@@ -110,4 +110,14 @@ class Sunflower::Page
 			"[[#{self.sunflower.ns_local_for 'Category'}:#{to}#{rest}"
 		}
 	end
+	
+	# Remove the category from page wikitext.
+	# 
+	# Input can be either with the Category: prefix (or localised version) or without.
+	def remove_category cat
+		cat_regex = self.sunflower.ns_regex_for 'Category'
+		cat = self.sunflower.cleanup_title(cat).sub(/^#{cat_regex}:/, '')
+		
+		self.text.gsub!(/\[\[ *#{cat_regex} *: *#{Regexp.escape cat} *(\|[^\]]*)?\]\](\r?\n)?/, '')
+	end
 end
