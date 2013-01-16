@@ -327,7 +327,7 @@ class Sunflower
 		
 		# 4. check bot rights
 		r=self.API('action=query&list=allusers&aulimit=1&augroup=bot&aufrom='+(CGI.escape user))
-		unless r['query']['allusers'][0]['name']==user
+		unless r['query']['allusers'][0] && r['query']['allusers'][0]['name']==user
 			warn 'Sunflower - this user does not have bot rights!' if @warnings
 			@is_bot=false
 		else
