@@ -154,8 +154,18 @@ class Sunflower
 			end
 		end
 		
-		@wikiURL = (url.include?('.') ? url : Sunflower.resolve_wikimedia_id(url))
-		@api_endpoint = opts[:api_endpoint] || 'http://'+@wikiURL+'/w/api.php'
+		# find out the base URL for this wiki and its API endpoint
+		# we joyfully assume that all URLs contain at least a single dot, which is incorrect, but oh well
+		if url.include?('.')
+			# a regular external wiki; use the RSD discovery mechanism to find out the endpoint
+			@wikiURL = url
+			# let's not pull in a HTML parsing library, this regex will do
+			@api_endpoint = opts[:api_endpoint] || RestClient.get(@wikiURL).to_str[/<link rel="EditURI" type="application\/rsd\+xml" href="([^"]+)\?action=rsd"/, 1]
+		else
+			# probably a Wikimedia wiki shorthand
+			@wikiURL = Sunflower.resolve_wikimedia_id(url)
+			@api_endpoint = opts[:api_endpoint] || 'http://'+@wikiURL+'/w/api.php'
+		end
 		
 		@warnings = true
 		@log = false
