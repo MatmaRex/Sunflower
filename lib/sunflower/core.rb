@@ -17,7 +17,7 @@ class Hash
 			if self[k].is_a?(Array) && other[k].is_a?(Array)
 				self[k].concat(other[k])
 			elsif self[k].is_a?(Hash) && other[k].is_a?(Hash)
-				self[k].recursive_merge!(other[k])
+				self[k].sunflower_recursive_merge!(other[k])
 			else
 				self[k] = other[k]
 			end
