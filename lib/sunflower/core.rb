@@ -260,7 +260,7 @@ class Sunflower
 		# merge
 		merged = out[0]
 		out.drop(1).each do |cur|
-			merged.recursive_merge! cur
+			merged.sunflower_recursive_merge! cur
 		end
 		
 		return merged
