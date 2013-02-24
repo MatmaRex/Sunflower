@@ -167,6 +167,11 @@ class Sunflower
 			@api_endpoint = opts[:api_endpoint] || 'http://'+@wikiURL+'/w/api.php'
 		end
 		
+		# handle protocol-relative URLs
+		u = URI.parse(@api_endpoint)
+		u.scheme ||= URI.parse(@wikiURL).scheme || 'http'
+		@api_endpoint = u.to_s
+		
 		@warnings = true
 		@log = false
 		
