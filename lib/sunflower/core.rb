@@ -349,6 +349,11 @@ class Sunflower
 	
 	# Cleans up underscores, percent-encoding and title-casing in title (with optional anchor).
 	def cleanup_title title, preserve_case=false, preserve_colon=false
+		# strip unicode bidi junk
+		title = title.gsub /[\u200e\u200f\u202a\u202b\u202c\u202d\u202e]/, ''
+		# strip unicode spaces
+		title = title.gsub /[\u00a0\u1680\u180e\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+/, ' '
+		
 		return '' if title.strip == ''
 		
 		name, anchor = title.split '#', 2
