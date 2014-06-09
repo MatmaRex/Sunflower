@@ -6,6 +6,6 @@ require 'sunflower'
 s = Sunflower.new.login
 s.summary = 'test summary'
 
-p = Sunflower::Page.new 'Test'
+p = s.page 'Test'
 p.text += "\n\ntest"
 p.save
