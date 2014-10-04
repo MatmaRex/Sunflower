@@ -225,7 +225,8 @@ class Sunflower
 		resp = RestClient.post(
 			@api_endpoint,
 			request,
-			{:user_agent => "Sunflower #{VERSION} alpha", :cookies => @cookies}
+			{:user_agent => "Sunflower #{VERSION} alpha <https://github.com/MatmaRex/Sunflower>",
+			 :cookies => @cookies}
 		)
 		JSON.parse resp.to_str
 	end
