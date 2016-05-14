@@ -41,6 +41,7 @@ end
 # You can use multiple Sunflowers at once, to work on multiple wikis.
 class Sunflower
 	VERSION = '0.5.12'
+	USER_AGENT = "Sunflower #{VERSION} alpha <https://github.com/MatmaRex/Sunflower>"
 	
 	INVALID_CHARS = %w(# < > [ ] | { })
 	INVALID_CHARS_REGEX = Regexp.union *INVALID_CHARS
@@ -225,7 +226,7 @@ class Sunflower
 		resp = RestClient.post(
 			@api_endpoint,
 			request,
-			{:user_agent => "Sunflower #{VERSION} alpha", :cookies => @cookies}
+			{:user_agent => USER_AGENT, :cookies => @cookies}
 		)
 		JSON.parse resp.to_str
 	end
@@ -296,7 +297,7 @@ class Sunflower
 		response = RestClient.post(
 			@api_endpoint, 
 			"action=login&lgname=#{CGI.escape user}&lgpassword=#{CGI.escape password}&format=json",
-			{:user_agent => "Sunflower #{VERSION} alpha"}
+			{:user_agent => USER_AGENT}
 		)
 		
 		@cookies = response.cookies
@@ -309,7 +310,7 @@ class Sunflower
 		response = RestClient.post(
 			@api_endpoint,
 			"action=login&lgname=#{CGI.escape user}&lgpassword=#{CGI.escape password}&lgtoken=#{CGI.escape token}&format=json",
-			{:user_agent => "Sunflower #{VERSION} alpha", :cookies => @cookies}
+			{:user_agent => USER_AGENT, :cookies => @cookies}
 		)
 		
 		json = JSON.parse response.to_str
