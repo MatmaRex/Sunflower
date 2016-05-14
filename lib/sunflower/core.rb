@@ -303,7 +303,7 @@ class Sunflower
 		raise Sunflower::Error, 'unable to log in (no cookies received)!' if !@cookies or @cookies.empty?
 		
 		json = JSON.parse response.to_str
-		token, prefix = (json['login']['lgtoken']||json['login']['token']), json['login']['cookieprefix']
+		token = json['login']['lgtoken'] || json['login']['token']
 		
 		# 2. actually log in
 		response = RestClient.post(
