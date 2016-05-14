@@ -4,9 +4,10 @@ Gem::Specification.new do |s|
 	s.date = "2013-05-26"
 	s.authors = ["Matma Rex"]
 	s.email = "matma.rex@gmail.com"
-	s.homepage = "http://github.com/MatmaRex/Sunflower"
-	s.summary = "Sunflower is a lightweight library to provide access to MediaWiki API from Ruby."
+	s.homepage = "https://github.com/MatmaRex/Sunflower"
+	s.summary = "Lightweight library to provide MediaWiki API access"
 	s.description = "Sunflower is a lightweight library to provide access to MediaWiki API from Ruby."
+	s.licenses = ["CC-BY-SA-3.0"]
 	
 	s.add_dependency 'json'
 	s.add_dependency 'rest-client'
@@ -16,7 +17,6 @@ Gem::Specification.new do |s|
 	s.bindir = "bin"
 	
   s.files = %w[
-		README
 		LICENSE
 		bin/sunflower-setup
 		example-bot.rb
