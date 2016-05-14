@@ -164,7 +164,7 @@ class Sunflower
 		else
 			# probably a Wikimedia wiki shorthand
 			@wikiURL = Sunflower.resolve_wikimedia_id(url)
-			@api_endpoint = opts[:api_endpoint] || 'http://'+@wikiURL+'/w/api.php'
+			@api_endpoint = opts[:api_endpoint] || 'https://'+@wikiURL+'/w/api.php'
 		end
 		
 		# handle protocol-relative URLs
