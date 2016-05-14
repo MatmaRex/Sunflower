@@ -40,7 +40,7 @@ end
 #
 # You can use multiple Sunflowers at once, to work on multiple wikis.
 class Sunflower
-	VERSION = '0.5.12'
+	VERSION = '0.5.13'
 	USER_AGENT = "Sunflower #{VERSION} alpha <https://github.com/MatmaRex/Sunflower>"
 	
 	INVALID_CHARS = %w(# < > [ ] | { })
