@@ -308,7 +308,7 @@ class Sunflower
 		# 2. actually log in
 		response = RestClient.post(
 			@api_endpoint,
-			"action=login&lgname=#{CGI.escape user}&lgpassword=#{CGI.escape password}&lgtoken=#{token}&format=json",
+			"action=login&lgname=#{CGI.escape user}&lgpassword=#{CGI.escape password}&lgtoken=#{CGI.escape token}&format=json",
 			{:user_agent => "Sunflower #{VERSION} alpha", :cookies => @cookies}
 		)
 		
