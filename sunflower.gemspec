@@ -1,13 +1,12 @@
 Gem::Specification.new do |s|
-  s.name = "sunflower"
-  s.version = "0.5.11"
-  s.date = "2013-05-26"
-  s.authors = ["Matma Rex"]
-  s.email = "matma.rex@gmail.com"
-  s.homepage = "http://github.com/MatmaRex/Sunflower"
-  s.summary = "Sunflower is a lightweight library to provide access to MediaWiki API from Ruby."
-  s.description = "Sunflower is a lightweight library to provide access to MediaWiki API from Ruby."
-	
+	s.name = "sunflower"
+	s.version = "0.5.11"
+	s.date = "2013-05-26"
+	s.authors = ["Matma Rex"]
+	s.email = "matma.rex@gmail.com"
+	s.homepage = "http://github.com/MatmaRex/Sunflower"
+	s.summary = "Sunflower is a lightweight library to provide access to MediaWiki API from Ruby."
+	s.description = "Sunflower is a lightweight library to provide access to MediaWiki API from Ruby."
 	
 	s.add_dependency 'json'
 	s.add_dependency 'rest-client'
